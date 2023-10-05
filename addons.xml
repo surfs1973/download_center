@@ -361,7 +361,6 @@ You can clone the project and host it in your own server.
         </assets>
     </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.inputstreamhelper" name="InputStream Helper" version="0.6.1+matrix.1" provider-name="emilsvennesson, dagwieers, mediaminister, horstle">
   <requires>
     <!--py3 compliant-->
@@ -419,75 +418,6 @@ v0.5.9 (2022-03-22)
     </assets>
   </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8"?>
-<addon
-  id="inputstream.adaptive"
-  version="20.3.13"
-  name="InputStream Adaptive"
-  provider-name="peak3d">
-  <requires>
-<import addon="kodi.binary.global.main" minversion="2.0.0" version="2.0.2"/>
-<import addon="kodi.binary.global.general" minversion="1.0.4" version="1.0.5"/>
-<import addon="kodi.binary.global.gui" minversion="5.15.0" version="5.15.0"/>
-<import addon="kodi.binary.global.filesystem" minversion="1.1.7" version="1.1.8"/>
-<import addon="kodi.binary.global.tools" minversion="1.0.0" version="1.0.4"/>
-<import addon="kodi.binary.instance.inputstream" minversion="3.2.0" version="3.2.0"/>
-<import addon="kodi.binary.instance.videocodec" minversion="2.0.1" version="2.0.3"/></requires>
-  <extension
-    point="kodi.inputstream"
-    name="adaptive"
-    extension=""
-    tags="true"
-    listitemprops="license_type|license_key|license_data|license_flags|manifest_type|server_certificate|manifest_update_parameter|manifest_params|manifest_headers|stream_params|stream_headers|original_audio_language|max_bandwidth|play_timeshift_buffer|pre_init_data|stream_selection_type|chooser_bandwidth_max|chooser_resolution_max|chooser_resolution_secure_max|live_delay"
-    library_android="libinputstream.adaptive.so"/>
-  <extension point="xbmc.addon.metadata">
-    <platform>android-armv7</platform>
-	<license>GPL-2.0-or-later</license>
-	<source>https://github.com/xbmc/inputstream.adaptive</source>
-	<assets>
-      <icon>icon.png</icon>
-      <fanart>fanart.jpg</fanart>
-    </assets>
-    <summary lang="ca_ES">Client InputStream per a transmissions adaptatives</summary>
-    <summary lang="cs_CZ">Klient adaptivních toků protokolu InputStream</summary>
-    <summary lang="da_DK">InputStream-klient til adaptive streams</summary>
-    <summary lang="de_DE">InputStream-Client für adaptive Streams</summary>
-    <summary lang="en_GB">InputStream client for adaptive streams</summary>
-    <summary lang="es_ES">Cliente InputStream para flujos de datos adaptativos</summary>
-    <summary lang="es_MX">Cliente InputStream para transmisiones adaptativas</summary>
-    <summary lang="fi_FI">InputStream-asiakas mukautuville mediavirroille</summary>
-    <summary lang="fr_FR">Client InputStream pour les flux adaptatifs</summary>
-    <summary lang="he_IL">לקוח InputStream לתזרימים מסתגלים</summary>
-    <summary lang="hr_HR">InputStream klijent za prilagodljiva strujanja</summary>
-    <summary lang="hu_HU">InputStream kliens az adaptív streamekhez</summary>
-    <summary lang="it_IT">Client InputStream per flussi adattivi</summary>
-    <summary lang="ko_KR">가변 스트림을 위한 InputStream 클라이언트</summary>
-    <summary lang="lv_LV">InputStream klients adaptīvām straumēm</summary>
-    <summary lang="nl_NL">InputStream client voor adaptive streams</summary>
-    <summary lang="pl_PL">Klient InputStream dla strumieni adaptacyjnych</summary>
-    <summary lang="ru_RU">InputStream клиент для адаптивных трансляций</summary>
-    <summary lang="zh_CN">用于自适应流的 InputStream 客户端</summary>
-    <description lang="ca_ES">Client InputStream per a transmissions adaptatives</description>
-    <description lang="cs_CZ">Klient adaptivních toků protokolu InputStream</description>
-    <description lang="da_DK">InputStream-klient til adaptive streams</description>
-    <description lang="de_DE">InputStream-Client für adaptive Streams. Unterstützt werden Streamingprotokolle wie MPEG-DASH, HLS und Microsoft Smooth Streaming.[CR][CR] Das Addon unterstützt ebenfalls DRM-geschützte Streams, wie Google Widevine, Microsoft Playready und andere.[CR][CR]Für Dokumentation https://github.com/xbmc/inputstream.adaptive besuchen</description>
-    <description lang="en_GB">InputStream client for adaptive streams. Common streaming protocols such as MPEG-DASH, HLS and Microsoft Smooth Streaming are supported.[CR][CR]The add-on also has support for DRM protected streams, such as Google Widevine, Microsoft PlayReady and others.[CR][CR]For documentation visit: https://github.com/xbmc/inputstream.adaptive</description>
-    <description lang="es_ES">Cliente InputStream para flujos de datos adaptativos. Es compatible con protocolos de transmisión habituales como MPEG-DASH, HLS y Microsoft Smooth Streaming.[CR][CR]El add-on también es compatible con transmisiones protegidas por DRM, como Google Widevine, Microsoft PlayReady y otros.[CR][CR]Para consultar la documentación, visite: https://github.com/xbmc/inputstream.adaptive</description>
-    <description lang="es_MX">Cliente InputStream para transmisiones adaptativas</description>
-    <description lang="fi_FI">InputStream-asiakas mukautuville mediavirroille, joka tukee yleisiä suoratoistoprotokollia, kuten MPEG-DASH, HLS ja Microsoft Smooth Streaming.[CR][CR]Tukee myös mm. Google Widevine ja Microsoft PlayReady -tekniikoilla DRM-suojattua suoratoistoa.[CR][CR]Ohjeita löydät osoitteesta https://github.com/xbmc/inputstream.adaptive.</description>
-    <description lang="fr_FR">Client InputStream pour les flux adaptatifs. Les protocoles de streaming courants tels que MPEG-DASH, HLS et Microsoft Smooth Streaming sont pris en charge.[CR][CR]Le module complémentaire prend également en charge les flux protégés par DRM, tels que Google Widevine, Microsoft PlayReady et autres.[CR][CR] Pour la documentation, visitez : https://github.com/xbmc/inputstream.adaptive</description>
-    <description lang="he_IL">לקוח InputStream לתזרימים מסתגלים</description>
-    <description lang="hr_HR">InputStream klijent za prilagodljiva strujanja</description>
-    <description lang="hu_HU">InputStream kliens az adaptív streamekhez</description>
-    <description lang="it_IT">Client InputStream per flussi adattivi. Sono supportati protocolli di streaming comuni come MPEG-DASH, HLS e Microsoft Smooth Streaming.[CR][CR]L&apos;add-on supporta anche flussi protetti da DRM, come Google Widevine, Microsoft PlayReady e altri.[CR][CR] ]Per la documentazione visita: https://github.com/xbmc/inputstream.adaptive</description>
-    <description lang="ko_KR">가변 스트림을 위한 InputStream 클라이언트</description>
-    <description lang="lv_LV">InputStream klients adaptīvām straumēm</description>
-    <description lang="pl_PL">Klient InputStream dla strumieni adaptacyjnych</description>
-    <description lang="ru_RU">InputStream клиент для адаптивных трансляций</description>
-    <description lang="zh_CN">用于自适应流的 InputStream 客户端</description>
-  </extension>
-</addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.certifi" name="certifi" version="2023.5.7" provider-name="Certifi">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
@@ -504,7 +434,6 @@ v0.5.9 (2022-03-22)
     </assets>
   </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.chardet" name="chardet" version="5.1.0" provider-name="Character Encoding Detector">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
@@ -522,7 +451,6 @@ v0.5.9 (2022-03-22)
     </assets>
   </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.clouddrive.common" name="Cloud Drive Common Module" version="1.4.0" provider-name="Carlos Guzman (cguZZman)">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0" />
@@ -562,7 +490,6 @@ You can clone the project and host it in your own server.
 		</disclaimer>
 	</extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.idna" name="idna" version="3.4.0" provider-name="Kim Davies">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
@@ -580,7 +507,6 @@ You can clone the project and host it in your own server.
     </assets>
   </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.infotagger" name="InfoTagger" provider-name="jurialmunkey" version="0.0.7">
   <requires>
     <import addon="xbmc.python" version="3.0.1"/>
@@ -597,9 +523,7 @@ You can clone the project and host it in your own server.
       <icon>icon.png</icon>
     </assets>
   </extension>
-
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.soupsieve" name="soupsieve" version="2.4.1" provider-name="Isaac Muse">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
@@ -617,7 +541,6 @@ You can clone the project and host it in your own server.
     </assets>
   </extension>
 </addon>
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.urllib3" name="urllib3" version="1.26.16+matrix.1" provider-name="urllib3">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
@@ -634,6 +557,131 @@ You can clone the project and host it in your own server.
       <icon>resources/icon.png</icon>
     </assets>
   </extension>
+</addon>
+<?xml version="1.0" encoding="UTF-8"?>
+<addon
+  id="inputstream.adaptive"
+  version="20.3.12"
+  name="InputStream Adaptive"
+  provider-name="peak3d">
+  <requires>
+<import addon="kodi.binary.global.main" minversion="2.0.0" version="2.0.2"/>
+<import addon="kodi.binary.global.general" minversion="1.0.4" version="1.0.5"/>
+<import addon="kodi.binary.global.gui" minversion="5.15.0" version="5.15.0"/>
+<import addon="kodi.binary.global.filesystem" minversion="1.1.7" version="1.1.8"/>
+<import addon="kodi.binary.global.tools" minversion="1.0.0" version="1.0.4"/>
+<import addon="kodi.binary.instance.inputstream" minversion="3.2.0" version="3.2.0"/>
+<import addon="kodi.binary.instance.videocodec" minversion="2.0.1" version="2.0.3"/></requires>
+  <extension
+    point="kodi.inputstream"
+    name="adaptive"
+    extension=""
+    tags="true"
+    listitemprops="license_type|license_key|license_data|license_flags|manifest_type|server_certificate|manifest_update_parameter|manifest_params|manifest_headers|stream_params|stream_headers|original_audio_language|max_bandwidth|play_timeshift_buffer|pre_init_data|stream_selection_type|chooser_bandwidth_max|chooser_resolution_max|chooser_resolution_secure_max|live_delay"
+    library_windows="inputstream.adaptive.dll"/>
+  <extension point="xbmc.addon.metadata">
+    <platform>windows-x86_64</platform>
+	<license>GPL-2.0-or-later</license>
+	<source>https://github.com/xbmc/inputstream.adaptive</source>
+	<assets>
+      <icon>icon.png</icon>
+      <fanart>fanart.jpg</fanart>
+    </assets>
+    <summary lang="ca_ES">Client InputStream per a transmissions adaptatives</summary>
+    <summary lang="cs_CZ">Klient adaptivních toků protokolu InputStream</summary>
+    <summary lang="da_DK">InputStream-klient til adaptive streams</summary>
+    <summary lang="de_DE">InputStream-Client für adaptive Streams</summary>
+    <summary lang="en_GB">InputStream client for adaptive streams</summary>
+    <summary lang="es_ES">Cliente InputStream para flujo de datos adaptativos</summary>
+    <summary lang="es_MX">Cliente InputStream para transmisiones adaptativas</summary>
+    <summary lang="fi_FI">InputStream-asiakas mukautuville mediavirroille</summary>
+    <summary lang="fr_FR">Client InputStream pour les flux adaptatifs</summary>
+    <summary lang="he_IL">לקוח InputStream לתזרימים מסתגלים</summary>
+    <summary lang="hr_HR">InputStream klijent za prilagodljiva strujanja</summary>
+    <summary lang="hu_HU">InputStream kliens az adaptív streamekhez</summary>
+    <summary lang="it_IT">Client InputStream per flussi adattivi</summary>
+    <summary lang="ko_KR">가변 스트림을 위한 InputStream 클라이언트</summary>
+    <summary lang="lv_LV">InputStream klients adaptīvām straumēm</summary>
+    <summary lang="nl_NL">InputStream client voor adaptive streams</summary>
+    <summary lang="pl_PL">Klient InputStream dla strumieni adaptacyjnych</summary>
+    <summary lang="ru_RU">InputStream клиент для адаптивных трансляций</summary>
+    <summary lang="zh_CN">用于自适应流的 InputStream 客户端</summary>
+    <description lang="ca_ES">Client InputStream per a transmissions adaptatives</description>
+    <description lang="cs_CZ">Klient adaptivních toků protokolu InputStream</description>
+    <description lang="da_DK">InputStream-klient til adaptive streams</description>
+    <description lang="de_DE">InputStream-Client für adaptive Streams. Unterstützt werden Streamingprotokolle wie MPEG-DASH, HLS und Microsoft Smooth Streaming.[CR][CR] Das Addon unterstützt ebenfalls DRM-geschützte Streams, wie Google Widevine, Microsoft Playready und andere.[CR][CR]Für Dokumentation https://github.com/xbmc/inputstream.adaptive besuchen</description>
+    <description lang="en_GB">InputStream client for adaptive streams. Common streaming protocols such as MPEG-DASH, HLS and Microsoft Smooth Streaming are supported.[CR][CR]The add-on also has support for DRM protected streams, such as Google Widevine, Microsoft PlayReady and others.[CR][CR]For documentation visit: https://github.com/xbmc/inputstream.adaptive</description>
+    <description lang="es_ES">Cliente InputStream para flujo de datos adaptativos</description>
+    <description lang="es_MX">Cliente InputStream para transmisiones adaptativas</description>
+    <description lang="fi_FI">InputStream-asiakas mukautuville mediavirroille, joka tukee yleisiä suoratoistoprotokollia, kuten MPEG-DASH, HLS ja Microsoft Smooth Streaming.[CR][CR]Tukee myös mm. Google Widevine ja Microsoft PlayReady -tekniikoilla DRM-suojattua suoratoistoa.[CR][CR]Ohjeita löydät osoitteesta https://github.com/xbmc/inputstream.adaptive.</description>
+    <description lang="fr_FR">Client InputStream pour les flux adaptatifs. Les protocoles de streaming courants tels que MPEG-DASH, HLS et Microsoft Smooth Streaming sont pris en charge.[CR][CR]Le module complémentaire prend également en charge les flux protégés par DRM, tels que Google Widevine, Microsoft PlayReady et autres.[CR][CR] Pour la documentation, visitez : https://github.com/xbmc/inputstream.adaptive</description>
+    <description lang="he_IL">לקוח InputStream לתזרימים מסתגלים</description>
+    <description lang="hr_HR">InputStream klijent za prilagodljiva strujanja</description>
+    <description lang="hu_HU">InputStream kliens az adaptív streamekhez</description>
+    <description lang="it_IT">Client InputStream per flussi adattivi. Sono supportati protocolli di streaming comuni come MPEG-DASH, HLS e Microsoft Smooth Streaming.[CR][CR]L&apos;add-on supporta anche flussi protetti da DRM, come Google Widevine, Microsoft PlayReady e altri.[CR][CR] ]Per la documentazione visita: https://github.com/xbmc/inputstream.adaptive</description>
+    <description lang="ko_KR">가변 스트림을 위한 InputStream 클라이언트</description>
+    <description lang="lv_LV">InputStream klients adaptīvām straumēm</description>
+    <description lang="pl_PL">Klient InputStream dla strumieni adaptacyjnych</description>
+    <description lang="ru_RU">InputStream клиент для адаптивных трансляций</description>
+    <description lang="zh_CN">用于自适应流的 InputStream 客户端</description>
+  </extension>
+</addon>
+<addon id="script.module.pysocks" name="PySocks" version="1.7.0+matrix.1" provider-name="anorov">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.module" library="lib"/>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">A SOCKS proxy client and wrapper for Python</summary>
+    <description lang="en_GB">PySocks lets you send traffic through SOCKS and HTTP proxy servers. It is a modern fork of SocksiPy with bug fixes and extra features.</description>
+    <platform>all</platform>
+    <language></language>
+    <license>BSD</license>
+    <forum></forum>
+    <website>https://github.com/Anorov/PySocks</website>
+    <source>https://github.com/Anorov/PySocks</source>
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
+  </extension>
+</addon>
+<addon id="script.module.dateutil"
+       name="python-dateutil"
+       version="2.8.2"
+       provider-name="Paul Ganssle, Gustavo Niemeyer, Tomi Pieviläinen, Yaron de Leeuw">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0"/>
+    <import addon="script.module.six" version="1.15.0+matrix.1"/>
+  </requires>
+  <extension point="xbmc.python.module"
+             library="lib" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Extensions to the standard Python datetime module</summary>
+    <description lang="en_GB">The dateutil module provides powerful extensions to the standard datetime module, available in Python.</description>
+    <license>Apache-2.0, BSD-3-Clause</license>
+    <website>https://dateutil.readthedocs.io/en/stable/</website>
+    <source>https://github.com/dateutil/dateutil</source>
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
+  </extension>
+</addon>
+<addon id="script.module.pyqrcode" version="1.2.1+matrix.4" name="pyQRcode" provider-name="Michael Nooner">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0" />
+    </requires>
+    <extension library="lib" point="xbmc.python.module" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB">A Python interface to generate QR Code</summary>
+        <description lang="en_GB">A Python interface to generate QR Code</description>
+        <website>https://pypi.org/project/PyQRCode</website>
+        <license>BSD-3-Clause</license>
+        <platform>all</platform>
+        <source>https://github.com/mnooner256/pyqrcode</source>
+        <assets>
+            <icon>icon.png</icon>
+        </assets>
+    </extension>
 </addon>
 
 </addons>
