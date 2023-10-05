@@ -62,7 +62,7 @@ You can clone the project and host it in your own server.
         <provides>video</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <description lang="en_GB">Watch Asian Drama and Korean Show with English subtitles on DramaCool.</description>
+        <description lang="en_GB">Watch Asian Dramas from Dramacool courtesy of yours truly.</description>
         <platform>all</platform>
         <license>MIT License</license>
         <source>https://github.com/groggyegg/plugin.video.dramacool</source>
