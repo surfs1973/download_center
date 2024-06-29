@@ -12,7 +12,7 @@
             <provides>video</provides>
         </extension>
         <extension point="xbmc.addon.metadata">
-            <description lang="en_GB">Streaming through Kodi,\nShows flow seamless, ad-free peace,\nSilent nights with joy.</description>
+            <description lang="en_GB">Streaming through Kodi,&#xA;Shows flow seamless, ad-free peace,&#xA;Silent nights with joy.</description>
             <platform>all</platform>
             <license>MIT License</license>
             <source>https://github.com/groggyegg/plugin.video.dramacool</source>
