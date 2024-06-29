@@ -50,7 +50,7 @@ You can clone the project and host it in your own server.
 		</disclaimer>
 	</extension>
 </addon>
-<addon id="plugin.video.dramacool" name="DramaMagic" version="3.2.1" provider-name="Jon">
+<addon id="plugin.video.dramacool" name="DramaMagic" version="3.2.1.1" provider-name="Jon">
     <requires>
         <import addon="script.module.beautifulsoup4"/>
         <import addon="script.module.peewee"/>
@@ -346,7 +346,7 @@ You can clone the project and host it in your own server.
     </assets>
   </extension>
 </addon>
-<addon id="script.module.xbmcext" name="XBMCExt" version="1.4.0" provider-name="groggyegg">
+<addon id="script.module.xbmcext" name="XBMCExt" version="1.5.2" provider-name="groggyegg">
     <requires>
         <import addon="script.module.six"/>
     </requires>
