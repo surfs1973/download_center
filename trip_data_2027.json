@@ -528,112 +528,351 @@
     },
     {
       "id": 7,
-      "city": "Tokyo (Ueno / Asakusa)",
+      "city": "Tokyo (Ginza / Hibiya / Kyobashi)",
       "dates": "Oct 28–31",
       "nights": 3,
       "transit": "Oct 28 · Fly Sapporo (CTS) → Haneda (3 final free days in Tokyo)",
-      "routeNote": "Three free days in Tokyo for shopping, food & easy airport return.",
-      "subtleAreaNote": "Prefer a sleeker central area like Ginza? Let me know and we can shortlist Ginza instead.",
-      "baselineOptionId": "7B",
+      "routeNote": "Final 3 nights in central Tokyo — walkable to Ginza shopping, Yurakucho/Hibiya dining, and Tokyo Station/Haneda transit. Use the toggles below to compare Twin vs. Shared Double beds and Room Only vs. Breakfast.",
+      "baselineOptionId": "7A",
       "gridCols": "md:grid-cols-2",
+      "hasStopConfigurator": true,
+      "defaultVariant": { "beds": "twin", "meal": "ro" },
       "guide": {
         "hotels": [
           {
-            "name": "Mitsui Garden Hotel Ueno (Option 7A)",
-            "summary": "Freshly renovated (2023) directly across from Ueno Station — best overall JR/Metro hub and proper twin beds for brothers.",
-            "location": "1 min to Tokyo Metro Ueno (Exit 1 w/ elevator), 2 min to JR Ueno (Yamanote/Shinkansen); 4–5 min flat walk to Ameyoko & Ueno Park.",
-            "baths": "En-suite modern bathrooms (no public bath).",
-            "meals": "Room Only (tons of cafés, konbini & Ameyoko spots outside; Bosco-il-chianti Italian restaurant on 1F).",
-            "facilities": "Coin laundry, microwaves, ice/vending, luggage shipping, 24-hr desk."
+            "name": "Hotel Gracery Ginza (Option 7A)",
+            "summary": "Full-service Ginza 6-chome hotel right behind GINZA SIX with spacious 23 m² Twin & true 3-bed Standard Triple rooms — live Oct 2027 official pricing.",
+            "location": "3-min walk to Ginza Stn (Exit A3 — Ginza/Marunouchi/Hibiya lines), 5 min to Higashi-Ginza Stn (Asakusa Line direct to Haneda), 7 min to JR Shimbashi.",
+            "baths": "Private en-suite bathrooms with full bathtub in every room (no public bath).",
+            "meals": "Optional Japanese/Western breakfast buffet at 3F Bonsalute (+S$56/sib for 3 mornings), plus endless Ginza cafés and eateries outside.",
+            "facilities": "3F guests-only lounge with complimentary coffee/tea, coin laundry, luggage storage, 24-hr front desk, 11 AM checkout."
           },
           {
-            "name": "Super Hotel Ueno-Okachimachi (Option 7B)",
-            "summary": "High-value Okachimachi hub with 4 train lines in 1–4 min, free daily breakfast, welcome drink bar, and Sister’s own connected room.",
-            "location": "1 min Naka-Okachimachi (Hibiya), 2 min Ueno-Okachimachi (Oedo), 3 min JR Okachimachi (Yamanote), 4 min Ginza Line; 5–7 min walk to Akihabara.",
-            "baths": "Compact en-suite bathrooms (no public bath).",
-            "meals": "Complimentary buffet breakfast daily (7:00–9:30 am, takeaway available) + evening welcome drink bar.",
-            "facilities": "Pillow bar, coin laundry, luggage storage. Catch: 12 m² room is tight for 2 brothers sharing 1 double bed; desk closes 12 am–7 am."
+            "name": "Super Hotel Premier Ginza (Option 7B)",
+            "summary": "Higashi-Ginza standout with a natural hot-spring public bath, organic buffet breakfast, evening welcome drink bar, and Sister’s own adjoining 12 m² bedroom via internal door.",
+            "location": "1-min walk to Higashi-Ginza Stn (Exit A7 — direct Toei Asakusa train to Haneda & Hibiya Line), 3 min to Ginza 4-chome & Kabukiza.",
+            "baths": "Natural alkaline hot-spring public bath (Okuyugawara mineral spring, separate men’s & women’s baths) plus private unit bath in each room.",
+            "meals": "Optional organic buffet breakfast (+S$36/sib for 3 mornings — freshly baked bread & organic salads) plus complimentary evening welcome drink bar.",
+            "facilities": "Pillow bar, coin laundry, shared microwave/ice, luggage storage, opt-in daily cleaning via door magnet, 10 AM checkout."
           },
           {
-            "name": "Dormy Inn EXPRESS Asakusa (Option 7C)",
-            "summary": "Riverside Asakusa base facing Sumida River & Tokyo Skytree with 10F bath, free nightly ramen, and direct Toei Asakusa train to Haneda.",
-            "location": "2 min to Asakusa Stn (Ginza Line Exit 5), 5 min to Toei Asakusa Line (direct zero-transfer train to Haneda) & Senso-ji Temple. Further northeast off Yamanote.",
-            "baths": "10F Asahi-yu open-air bath, sauna & Skytree foot bath. Catch: rotates by gender (Thu men-only; Fri–Sat women 3–8 pm, men 8:30 pm–10 am).",
-            "meals": "Room Only. Free nightly Yonaki Soba ramen (9:30–11 pm), post-bath ice cream & morning probiotic drinks.",
-            "facilities": "10F scenic foot bath, laundry, shared microwave, 24-hr desk. Older 2009 renovation."
+            "name": "Sotetsu Fresa Inn Ginza-Sanchome (Option 7C)",
+            "summary": "Crisp, modern all-non-smoking Ginza 3-chome hotel with Serta mattresses, generous 18.6 m² Superior Twin (2×120 cm beds), and lowest Twin+Solo 2+2+1 cost.",
+            "location": "3-min walk to Ginza Stn (Exit A13 near Matsuya Ginza), 3 min to Ginza-itchome (Yurakucho Line), 4 min to Higashi-Ginza (direct Haneda train).",
+            "baths": "Private en-suite bathrooms with bathtub and Ryosui Kobo purified water throughout the building (no public bath).",
+            "meals": "Optional daily breakfast (+S$53/sib for 3 mornings) or grab morning pastries/coffee steps away in Ginza 3-chome.",
+            "facilities": "Free lobby amenity bar (bath salts, skincare, teas), self check-in kiosks, coin laundry, microwave/ice, opt-in daily cleaning via blue door tag."
+          },
+          {
+            "name": "remm Tokyo Kyobashi (Option 7D)",
+            "summary": "Sleek sleep-focused hotel right beside Kyobashi Station and a 7-min flat walk to Tokyo Station — live Oct 2027 official pricing with 12 PM checkout.",
+            "location": "1-min walk to Kyobashi Stn Exit 6 (Ginza Line), 2 min to Takaracho (Asakusa Line direct to Haneda), 7-min walk to JR Tokyo Station Yaesu Exit.",
+            "baths": "Private en-suite bathrooms (rain shower booth in Semi-Double/Double; bathtub in Twin) plus an in-room massage chair in every room (no public bath).",
+            "meals": "Optional Japanese/Western breakfast buffet at 7F Arch Cafe & Bar (+S$49/sib for 3 mornings) or Tokyo Station Yaesu eateries nearby.",
+            "facilities": "Original Silky remm mattresses, in-room massage chair, coin laundry, luggage lockers, 24-hr desk, generous 12 PM checkout."
+          },
+          {
+            "name": "remm Hibiya (Option 7E)",
+            "summary": "Prime Yurakucho/Hibiya theater-district location with an in-room massage chair and 12 PM checkout — unbeatable budget value in Shared Double mode (S$341/sib RO).",
+            "location": "2-min walk to Hibiya Stn (Hibiya/Chiyoda/Mita lines), 4 min to JR Yurakucho (Yamanote Line), 5 min to Ginza & Imperial Palace, across from Tokyo Midtown Hibiya.",
+            "baths": "Private en-suite bathrooms (rain shower booth in Solo Economy Double; bathtub in Twin) plus an in-room massage chair in every room (no public bath).",
+            "meals": "Optional breakfast at 2F Café & Meal MUJI attached to the hotel lobby (+S$49–59/sib for 3 mornings), plus Yurakucho/Hibiya dining steps away.",
+            "facilities": "Original Silky remm mattresses, in-room massage chair, direct access to Café & Meal MUJI, guest luggage lockers, 12 PM checkout."
           }
         ],
-        "verdict": "Pick Mitsui Garden (7A, +{{diff:65613-48655}}/sib vs. 7B) for 2023 rooms, 2 proper twin beds for brothers, and the easiest JR hub. Pick Super Hotel (7B) for free daily breakfast, welcome drinks & Sister’s own adjoining room. Pick Dormy Inn Asakusa (7C, −{{diff:48655-39670}}/sib vs. 7B) for lowest cost, free ramen & direct Haneda train — if you don’t mind being further northeast and the rotating bath hours."
+        "verdict": "Pick Hotel Gracery Ginza (7A) for live Oct 2027 rates, spacious 23 m² Twin + true 3-bed Triple rooms, and prime Ginza 6-chome shopping. Pick Super Hotel Premier Ginza (7B) for Sister’s own connected bedroom, a natural hot-spring bath, welcome drinks, and the best breakfast value (S$477/sib Twin BF). Pick Sotetsu Fresa Inn Ginza-Sanchome (7C) for the cheapest true 2+2+1 Twin + Solo setup (S$472/sib RO), remm Tokyo Kyobashi (7D) for live Oct 2027 2+2+1 near Tokyo Station, or remm Hibiya (7E) in Shared Double RO mode (S$341/sib) for maximum Tokyo savings."
       },
       "options": [
         {
           "id": "7A",
-          "name": "Mitsui Garden Hotel Ueno",
-          "shortName": "Mitsui Garden Ueno",
+          "name": "Hotel Gracery Ginza",
+          "shortName": "Gracery Ginza",
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
           "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 65613, "M2": 65613 },
-          "roomBadge": "3+2 · Proper Twin Beds",
-          "roomBreakdown": "Parents + Sister: 25 m² Superior Twin + Sofa Bed · Brothers: 22 m² Standard Twin (2 separate beds)",
+          "jpy": { "M1": 54573, "M2": 54573 },
+          "roomBadge": "3+2 · True 3-Bed Triple",
+          "roomBreakdown": "Brothers: Standard Twin (23 m², 2 beds) · Parents + Sister: Standard Triple (23 m², 3 single beds)",
           "tradeOffs": [
-            "Fresh 2023 renovation & proper separate twin beds for brothers",
-            "Best all-around JR Yamanote / Metro hub (1–2 min to Ueno Stn)",
-            "No free breakfast or public bath (adds S$36 into Meals vs. 7B)"
+            "Live Oct 28–31, 2027 official pricing — zero proxy uncertainty",
+            "Generous 23 m² rooms with 3 real 110 cm single beds in Parents+Sister Triple",
+            "Prime Ginza 6-chome location (3 min Ginza Stn, 5 min direct Haneda line); no public bath"
           ],
-          "mathNote": "Official MGH Rewards 45-day Early Bird Free Member (Apr 22–25, 2027 proxy): Brothers 22 m² Std Twin ¥140,885 + 1/3 of Parents+Sis 25 m² Triple ¥55,955 = ¥196,840 sibling pool ÷ 3 = ¥65,613/sib.",
-          "proxyFootnote": "Free cancel, daily cleaning, tax incl. Excludes Tokyo accommodation tax.",
-          "link": "https://www.gardenhotels.co.jp/ueno/eng/room/",
-          "mapsQuery": "Mitsui Garden Hotel Ueno Tokyo",
-          "mapArea": "Ueno Hub · Right on JR Yamanote",
-          "transitLine": "1–2 min JR Ueno (Yamanote/Shinkansen), Ginza & Hibiya lines"
+          "mathNote": "Official THE FUJITA MEMBERS Free Member (Live Oct 28–31, 2027, 60d Early Bird RO, tax incl.): Brothers 23 m² Standard Twin ¥117,540 + 1/3 of Parents+Sister 23 m² Standard Triple (¥138,540 ÷ 3 = ¥46,180) = ¥163,720 sibling pool ÷ 3 = ¥54,573/sib. Uses Standard Triple (3 real beds); Sofa-Bed Triple saves ~¥1,046/sib (~S$8).",
+          "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Free cancel up to 2 days prior; daily cleaning; excludes Tokyo 3% accommodation tax onsite.",
+          "link": "https://en.gracery.com/ginza/room/",
+          "mapsQuery": "Hotel Gracery Ginza Tokyo",
+          "mapArea": "Ginza 6-chome · Behind GINZA SIX",
+          "transitLine": "3 min Ginza Stn · 5 min Higashi-Ginza (direct Haneda) · 7 min JR Shimbashi",
+          "variants": {
+            "twin_ro": {
+              "jpy": { "M1": 54573, "M2": 54573 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Standard Twin (23 m², 2× 110 cm beds) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds)",
+              "mathNote": "Official THE FUJITA MEMBERS Free Member (Live Oct 28–31, 2027, 60d Early Bird RO, tax incl.): Brothers 23 m² Standard Twin ¥117,540 + 1/3 of Parents+Sister 23 m² Standard Triple (¥138,540 ÷ 3 = ¥46,180) = ¥163,720 sibling pool ÷ 3 = ¥54,573/sib. Uses Standard Triple (3 real beds); Sofa-Bed Triple saves ~¥1,046/sib (~S$8).",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Free cancel up to 2 days prior; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "twin_bf": {
+              "jpy": { "M1": 61470, "M2": 61470 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Standard Twin (23 m², 2× 110 cm beds) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds) + daily breakfast buffet",
+              "mathNote": "Official THE FUJITA MEMBERS Free Member (Live Oct 28–31, 2027, 60d Early Bird BF, tax incl.): Brothers 23 m² Standard Twin ¥131,340 + 1/3 of Parents+Sister 23 m² Standard Triple (¥159,210 ÷ 3 = ¥53,070) = ¥184,410 sibling pool ÷ 3 = ¥61,470/sib. Uses Standard Triple (3 real beds); Sofa-Bed Triple saves ~¥1,043/sib (~S$8).",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 3F Bonsalute breakfast buffet. Free cancel up to 2 days prior; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_ro": {
+              "jpy": { "M1": 46313, "M2": 46313 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Concept Flooring Double (15 m², 1× 140 cm bed) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds)",
+              "mathNote": "Official THE FUJITA MEMBERS Free Member (Live Oct 28–31, 2027, 60d Early Bird RO, tax incl.): Brothers 15 m² Concept Flooring Double ¥92,760 + 1/3 of Parents+Sister 23 m² Standard Triple (¥138,540 ÷ 3 = ¥46,180) = ¥138,940 sibling pool ÷ 3 = ¥46,313/sib. Uses Standard Triple (3 real beds); Sofa-Bed Triple saves ~¥1,046/sib (~S$8).",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Free cancel up to 2 days prior; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_bf": {
+              "jpy": { "M1": 53190, "M2": 53190 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Concept Flooring Double (15 m², 1× 140 cm bed) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds) + daily breakfast buffet",
+              "mathNote": "Official THE FUJITA MEMBERS Free Member (Live Oct 28–31, 2027, 60d Early Bird BF, tax incl.): Brothers 15 m² Concept Flooring Double ¥106,500 + 1/3 of Parents+Sister 23 m² Standard Triple (¥159,210 ÷ 3 = ¥53,070) = ¥159,570 sibling pool ÷ 3 = ¥53,190/sib. Uses Standard Triple (3 real beds); Sofa-Bed Triple saves ~¥1,043/sib (~S$8).",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 3F Bonsalute breakfast buffet. Free cancel up to 2 days prior; excludes Tokyo 3% accommodation tax onsite."
+            }
+          }
         },
         {
           "id": "7B",
-          "name": "Super Hotel Ueno-Okachimachi",
-          "shortName": "Super Hotel Okachimachi",
-          "mealTag": "Free Breakfast",
-          "breakfastMornings": 3,
+          "name": "Super Hotel Premier Ginza",
+          "shortName": "Super Hotel Ginza",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
           "halfBoardDinners": 0,
           "sisterSolo": { "M1": true, "M2": true },
-          "jpy": { "M1": 48655, "M2": 48655 },
-          "roomBadge": "Sister Adjoining Room",
-          "roomBreakdown": "Parents + Sister: 24 m² Connecting Room (separate bedroom w/ internal door) · Brothers: 12 m² Double (1 double bed)",
+          "jpy": { "M1": 54640, "M2": 54640 },
+          "roomBadge": "3+2 Connecting · Sister Adjoining Suite",
+          "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door)",
           "tradeOffs": [
-            "Free daily breakfast (saves S$36 in Meals) & evening welcome drink bar",
-            "4 train lines in 1–4 min (JR Yamanote, Hibiya, Oedo, Ginza); walk to Akihabara",
-            "Catch: 12 m² room is tight for 2 brothers sharing 1 double bed; desk closes 12–7 am"
+            "Sister gets her own adjoining 12 m² bedroom & bathroom via internal connecting door",
+            "Natural hot-spring public bath + evening welcome drink bar + top breakfast value (+S$36/sib for 3 mornings)",
+            "1 min to Higashi-Ginza (direct Haneda train); compact rooms (12–17 m²) & 10 AM checkout"
           ],
-          "mathNote": "Official Super Hotel (Apr 22–25, 2027 proxy, Free Breakfast): Brothers 12 m² Double ¥75,180 + ½ of 24 m² Connecting Suite ¥70,785 = ¥145,965 sibling pool ÷ 3 = ¥48,655/sib.",
-          "proxyFootnote": "Daily cleaning via door magnet; free cancel. Excludes Tokyo accommodation tax.",
-          "link": "https://www.superhotel.co.jp/s_hotels/okachimachi/",
-          "mapsQuery": "Super Hotel Ueno-Okachimachi Tokyo",
-          "mapArea": "Okachimachi · 4 Lines + Akihabara Walk",
-          "transitLine": "1–4 min Hibiya, Oedo, JR Yamanote & Ginza lines"
+          "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 17 m² Deluxe Twin ¥104,520 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥178,200 ÷ 3 = ¥59,400) = ¥163,920 sibling pool ÷ 3 = ¥54,640/sib.",
+          "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 window closed after May 2027). Pay at check-in; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite.",
+          "link": "https://www.superhotel.co.jp/s_hotels/ginza/",
+          "mapsQuery": "Super Hotel Premier Ginza Tokyo",
+          "mapArea": "Higashi-Ginza · 1 min Direct Haneda Train",
+          "transitLine": "1 min Higashi-Ginza (Asakusa direct Haneda & Hibiya) · 3 min Ginza Stn",
+          "variants": {
+            "twin_ro": {
+              "jpy": { "M1": 54640, "M2": 54640 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 separate beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² rooms joined by internal door, 2× 150 cm beds, 2 baths)",
+              "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 17 m² Deluxe Twin ¥104,520 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥178,200 ÷ 3 = ¥59,400) = ¥163,920 sibling pool ÷ 3 = ¥54,640/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Pay at check-in; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "twin_bf": {
+              "jpy": { "M1": 59140, "M2": 59140 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 separate beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door) + organic buffet breakfast",
+              "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 17 m² Deluxe Twin ¥113,520 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥191,700 ÷ 3 = ¥63,900) = ¥177,420 sibling pool ÷ 3 = ¥59,140/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Organic buffet breakfast + evening welcome drink bar; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_ro": {
+              "jpy": { "M1": 50140, "M2": 50140 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Standard Double (12 m², 1× 150 cm wide bed) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door, 2× 150 cm beds, 2 baths)",
+              "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 12 m² Standard Double ¥91,020 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥178,200 ÷ 3 = ¥59,400) = ¥150,420 sibling pool ÷ 3 = ¥50,140/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Pay at check-in; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_bf": {
+              "jpy": { "M1": 54640, "M2": 54640 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Standard Double (12 m², 1× 150 cm wide bed) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door) + organic buffet breakfast",
+              "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 12 m² Standard Double ¥100,020 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥191,700 ÷ 3 = ¥63,900) = ¥163,920 sibling pool ÷ 3 = ¥54,640/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Organic buffet breakfast + evening welcome drink bar; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
+            }
+          }
         },
         {
           "id": "7C",
-          "name": "Dormy Inn EXPRESS Asakusa",
-          "shortName": "Dormy Inn Asakusa",
-          "mealTag": "Room Only · Ramen",
+          "name": "Sotetsu Fresa Inn Ginza-Sanchome",
+          "shortName": "Sotetsu Fresa Ginza 3",
+          "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 39670, "M2": 39670 },
-          "roomBadge": "3+2 · Shared Queen",
-          "roomBreakdown": "Parents + Sister: 27 m² Jap-West River View · Brothers: 20 m² Shared Queen River View (no bunks)",
+          "sisterSolo": { "M1": true, "M2": true },
+          "jpy": { "M1": 58437, "M2": 58437 },
+          "roomBadge": "Sister Solo Room (2+2+1)",
+          "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 140 cm bed)",
           "tradeOffs": [
-            "Lowest Tokyo cost; 10F Skytree bath + free nightly ramen; direct Haneda train",
-            "Further northeast off the Yamanote loop (2 min Ginza Line, 5 min Senso-ji)",
-            "Catch: bath rotates by gender (Thu men-only; Fri–Sat women 3–8 pm only); 2009 reno"
+            "Cheapest true 2+2+1 Twin + Solo setup in central Ginza 3-chome (S$472/sib RO)",
+            "Wide 2× 120 cm Serta twin beds & 100% non-smoking property with free lobby amenity bar",
+            "Sister’s 12 m² solo room is compact; no public bath; proxy Apr 2027 rate (20% Early Bird)"
           ],
-          "mathNote": "Official Dormy Standard planId=960 (Apr 22–25, 2027 proxy): Brothers 20 m² Shared Queen River View ¥78,390 (no bunks) + 1/3 of Parents+Sis 27 m² Jap-West ¥40,620 = ¥119,010 sibling pool ÷ 3 = ¥39,670/sib.",
-          "proxyFootnote": "Only 4 Jap-West rooms in property. Free cancel; excludes Tokyo accommodation tax.",
-          "link": "https://dormy-hotels.com/dormyinn/hotels/asakusa/rooms/",
-          "mapsQuery": "Dormy Inn Express Asakusa Tokyo",
-          "mapArea": "Asakusa Riverfront · Further Northeast",
-          "transitLine": "2 min Ginza Line · 5 min Toei Asakusa (direct Haneda)"
+          "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 18.6 m² Superior Twin ¥108,496 + Sister 12 m² Standard Single ¥66,816 = ¥175,312 sibling pool ÷ 3 = ¥58,437/sib.",
+          "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite.",
+          "link": "https://en.sotetsu-hotels.com/fresa-inn/ginza3/rooms/",
+          "mapsQuery": "Sotetsu Fresa Inn Ginza-Sanchome Tokyo",
+          "mapArea": "Ginza 3-chome · Near Matsuya Ginza",
+          "transitLine": "3 min Ginza & Ginza-itchome · 4 min Higashi-Ginza (direct Haneda)",
+          "variants": {
+            "twin_ro": {
+              "jpy": { "M1": 58437, "M2": 58437 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+              "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 18.6 m² Superior Twin ¥108,496 + Sister 12 m² Standard Single ¥66,816 = ¥175,312 sibling pool ÷ 3 = ¥58,437/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "twin_bf": {
+              "jpy": { "M1": 65037, "M2": 65037 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+              "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 18.6 m² Superior Twin ¥121,696 + Sister 12 m² Standard Single ¥73,416 = ¥195,112 sibling pool ÷ 3 = ¥65,037/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_ro": {
+              "jpy": { "M1": 54357, "M2": 54357 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+              "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 15.3 m² Comfort Double ¥96,256 + Sister 12 m² Standard Single ¥66,816 = ¥163,072 sibling pool ÷ 3 = ¥54,357/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_bf": {
+              "jpy": { "M1": 60957, "M2": 60957 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+              "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 15.3 m² Comfort Double ¥109,456 + Sister 12 m² Standard Single ¥73,416 = ¥182,872 sibling pool ÷ 3 = ¥60,957/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
+            }
+          }
+        },
+        {
+          "id": "7D",
+          "name": "remm Tokyo Kyobashi",
+          "shortName": "remm Kyobashi",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": true },
+          "jpy": { "M1": 64511, "M2": 64511 },
+          "roomBadge": "Sister Solo Room (2+2+1)",
+          "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
+          "warningBadge": "1 Twin room left (Oct 2027)",
+          "tradeOffs": [
+            "Live Oct 28–31, 2027 official pricing (HH cross ID Free Member ~15% off)",
+            "In-room massage chair in every room, 12 PM late checkout & 7-min walk to Tokyo Station",
+            "Catch: only 1 Economy Twin left for Oct 2027; Inside Semi-Double has shower booth only"
+          ],
+          "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive RO, tax incl.): Brothers 18.4 m² Economy Twin ¥100,118 + Sister 15 m² Inside Semi-Double ¥93,415 = ¥193,533 sibling pool ÷ 3 = ¥64,511/sib.",
+          "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Pay at hotel; free cancel; daily cleaning; excludes Tokyo 3% accommodation tax onsite.",
+          "link": "https://www.hankyu-hotel.com/en/hotel/remm/tokyo-kyobashi/accommodation",
+          "mapsQuery": "remm Tokyo Kyobashi Tokyo",
+          "mapArea": "Kyobashi · 7 min Walk to Tokyo Station",
+          "transitLine": "1 min Kyobashi (Ginza) · 2 min Takaracho (direct Haneda) · 7 min JR Tokyo",
+          "variants": {
+            "twin_ro": {
+              "jpy": { "M1": 64511, "M2": 64511 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive RO, tax incl.): Brothers 18.4 m² Economy Twin ¥100,118 + Sister 15 m² Inside Semi-Double ¥93,415 = ¥193,533 sibling pool ÷ 3 = ¥64,511/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite.",
+              "warningBadge": "1 Twin room left (Oct 2027)"
+            },
+            "twin_bf": {
+              "jpy": { "M1": 70572, "M2": 70572 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth) + daily breakfast",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive BF, tax incl.): Brothers 18.4 m² Economy Twin ¥112,232 + Sister 15 m² Inside Semi-Double ¥99,484 = ¥211,716 sibling pool ÷ 3 = ¥70,572/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 7F Arch Cafe breakfast. Pay at hotel; free cancel; excludes Tokyo 3% accommodation tax onsite.",
+              "warningBadge": "1 Twin room left (Oct 2027)"
+            },
+            "double_ro": {
+              "jpy": { "M1": 62276, "M2": 62276 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Inside Semi-Double (15 m², ~140 cm bed, shower booth) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive RO, tax incl.): Brothers 15 m² Inside Semi-Double ¥93,414 + Sister 15 m² Inside Semi-Double ¥93,415 = ¥186,829 sibling pool ÷ 3 = ¥62,276/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_bf": {
+              "jpy": { "M1": 68336, "M2": 68336 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Inside Semi-Double (15 m², ~140 cm bed, shower booth) · Sister (Solo): Inside Semi-Double (15 m², shower booth) + daily breakfast",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive BF, tax incl.): Brothers 15 m² Inside Semi-Double ¥105,524 + Sister 15 m² Inside Semi-Double ¥99,484 = ¥205,008 sibling pool ÷ 3 = ¥68,336/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 7F Arch Cafe breakfast. Pay at hotel; free cancel; excludes Tokyo 3% accommodation tax onsite."
+            }
+          }
+        },
+        {
+          "id": "7E",
+          "name": "remm Hibiya",
+          "shortName": "remm Hibiya",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": true },
+          "jpy": { "M1": 106722, "M2": 106722 },
+          "roomBadge": "Sister Solo Room (2+2+1)",
+          "roomBreakdown": "Brothers: Twin (23 m², JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², JAPANiCAN)",
+          "warningBadge": "OTA Twin only — switch to Shared Double for S$341",
+          "tradeOffs": [
+            "Prime Hibiya / Yurakucho hub (2 min Hibiya, 4 min JR Yurakucho, 5 min Ginza) + 12 PM checkout",
+            "In-room massage chair + Café & Meal MUJI in hotel lobby; lowest budget rate in Shared Double RO (S$341/sib)",
+            "Catch: Official Twin rooms unavailable; JAPANiCAN Twin is rack-rate priced (S$861/sib)"
+          ],
+          "mathNote": "JAPANiCAN Live Oct 28–31, 2027 (JAWDRCT promo, Free Cancel, tax incl.): Brothers 23 m² Twin ¥200,508 + Sister 15 m² Semi-Double ¥119,658 = ¥320,166 sibling pool ÷ 3 = ¥106,722/sib.",
+          "proxyFootnote": "Live Oct 28–31, 2027 JAPANiCAN secondary OTA benchmark (Official Oct 2027 closed & Official Twin sold out). Free cancel before Oct 27, 2027; excludes Tokyo 3% accommodation tax onsite.",
+          "link": "https://www.hankyu-hotel.com/en/hotel/remm/hibiya/accommodation",
+          "mapsQuery": "remm Hibiya Tokyo",
+          "mapArea": "Hibiya / Yurakucho · Across Midtown Hibiya",
+          "transitLine": "2 min Hibiya (Hibiya/Chiyoda/Mita) · 4 min JR Yurakucho (Yamanote) · 5 min Ginza",
+          "variants": {
+            "twin_ro": {
+              "jpy": { "M1": 106722, "M2": 106722 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Twin (23 m², 2 beds, bathtub — JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², shower booth — JAPANiCAN)",
+              "mathNote": "JAPANiCAN Live Oct 28–31, 2027 (JAWDRCT promo, Free Cancel, tax incl.): Brothers 23 m² Twin ¥200,508 + Sister 15 m² Semi-Double ¥119,658 = ¥320,166 sibling pool ÷ 3 = ¥106,722/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 JAPANiCAN OTA benchmark (Official Oct 2027 closed & Official Twin sold out). Free cancel before Oct 27, 2027; excludes Tokyo 3% accommodation tax onsite.",
+              "warningBadge": "OTA Twin only — switch to Shared Double for S$341"
+            },
+            "twin_bf": {
+              "jpy": { "M1": 114063, "M2": 114063 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Twin (23 m², 2 beds, bathtub — JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², shower booth — JAPANiCAN) + daily breakfast",
+              "mathNote": "JAPANiCAN Live Oct 28–31, 2027 (JAWDRCT promo, Free Cancel, BF, tax incl.): Brothers 23 m² Twin ¥215,190 + Sister 15 m² Semi-Double ¥126,999 = ¥342,189 sibling pool ÷ 3 = ¥114,063/sib.",
+              "proxyFootnote": "Live Oct 28–31, 2027 JAPANiCAN OTA benchmark w/ breakfast (Official Oct 2027 closed & Official Twin sold out). Free cancel before Oct 27, 2027; excludes Tokyo 3% accommodation tax onsite.",
+              "warningBadge": "OTA Twin only — switch to Shared Double for S$390"
+            },
+            "double_ro": {
+              "jpy": { "M1": 42250, "M2": 42250 },
+              "breakfastMornings": 0,
+              "mealTag": "Room Only",
+              "roomBreakdown": "Brothers: Economy Double (15.1 m², ~140 cm bed, bathtub, Apr 2027 Official Member proxy) · Sister (Solo): Economy Double (15.1 m², shower booth)",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Apr 22–25, 2027 proxy, 3+ Nights Consecutive RO, tax incl.): Brothers 15.1 m² Economy Double ¥63,374 + Sister 15.1 m² Economy Double ¥63,376 = ¥126,750 sibling pool ÷ 3 = ¥42,250/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 Official Free Member proxy (Oct 2027 not open on Official yet). Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
+            },
+            "double_bf": {
+              "jpy": { "M1": 48310, "M2": 48310 },
+              "breakfastMornings": 3,
+              "mealTag": "With Breakfast (3 mornings)",
+              "roomBreakdown": "Brothers: Economy Double (15.1 m², ~140 cm bed, bathtub, Apr 2027 Official Member proxy) · Sister (Solo): Economy Double (15.1 m², shower booth) + daily breakfast",
+              "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Apr 22–25, 2027 proxy, 3+ Nights Consecutive BF, tax incl.): Brothers 15.1 m² Economy Double ¥75,486 + Sister 15.1 m² Economy Double ¥69,445 = ¥144,931 sibling pool ÷ 3 = ¥48,310/sib.",
+              "proxyFootnote": "Apr 22–25, 2027 Official Free Member proxy w/ 2F Café & Meal MUJI breakfast. Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
+            }
+          }
         }
       ]
     }
@@ -643,22 +882,28 @@
       "id": "baseline",
       "name": "The Comfort Baseline",
       "tag": "Reference Pick",
-      "desc": "La Vista Furano, 5★ Takinoya, Nonokaze Club & Super Hotel w/ free breakfast.",
-      "picks": { "1": "1A", "2": "2A_BF", "3": "3A", "4": "4A", "7": "7B" }
+      "desc": "La Vista Furano, 5★ Takinoya, Nonokaze Club & Hotel Gracery Ginza (live Oct 2027, Twin RO).",
+      "picks": { "1": "1A", "2": "2A_BF", "3": "3A", "4": "4A", "7": "7A" },
+      "stop7Beds": "twin",
+      "stop7Meal": "ro"
     },
     {
       "id": "smart",
       "name": "Smart Value",
       "tag": "Recommended",
-      "desc": "Save big on sightseeing-heavy Furano to keep the 5★ onsen resorts & upgrade Tokyo to proper twin beds.",
-      "picks": { "1": "1A", "2": "2B_RO", "3": "3A", "4": "4A", "7": "7A" }
+      "desc": "Save big on sightseeing-heavy Furano to keep the 5★ onsen resorts & pick Super Hotel Premier Ginza (Twin + organic breakfast & Sister’s connected room).",
+      "picks": { "1": "1A", "2": "2B_RO", "3": "3A", "4": "4A", "7": "7B" },
+      "stop7Beds": "twin",
+      "stop7Meal": "bf"
     },
     {
       "id": "budget",
       "name": "Budget-Friendly",
       "tag": "Lowest Likely",
-      "desc": "Natulux RO + Tamanoyu Std + Nonokaze Spa + Super Hotel for maximum savings.",
-      "picks": { "1": "1A", "2": "2B_RO", "3": "3B_STD", "4": "4B", "7": "7B" }
+      "desc": "Natulux RO + Tamanoyu Std + Nonokaze Spa + remm Hibiya (Shared Double RO) for maximum savings.",
+      "picks": { "1": "1A", "2": "2B_RO", "3": "3B_STD", "4": "4B", "7": "7E" },
+      "stop7Beds": "double",
+      "stop7Meal": "ro"
     }
   ],
   "directory": [
@@ -721,25 +966,39 @@
       "mapsQuery": "THE GATE HOTEL Sapporo by HULIC"
     },
     {
-      "stop": "Stop 7A · Tokyo Ueno (3N)",
-      "name": "Mitsui Garden Hotel Ueno",
-      "note": "2023 reno · best JR hub & twin beds",
-      "url": "https://www.gardenhotels.co.jp/ueno/eng/room/",
-      "mapsQuery": "Mitsui Garden Hotel Ueno Tokyo"
+      "stop": "Stop 7A · Ginza 6-chome (3N)",
+      "name": "Hotel Gracery Ginza",
+      "note": "Live Oct 2027 · 23 m² Twin & 3-bed Triple",
+      "url": "https://en.gracery.com/ginza/room/",
+      "mapsQuery": "Hotel Gracery Ginza Tokyo"
     },
     {
-      "stop": "Stop 7B · Tokyo Okachimachi (3N)",
-      "name": "Super Hotel Ueno-Okachimachi",
-      "note": "Free breakfast · 4 lines · connecting room",
-      "url": "https://www.superhotel.co.jp/s_hotels/okachimachi/",
-      "mapsQuery": "Super Hotel Ueno-Okachimachi Tokyo"
+      "stop": "Stop 7B · Higashi-Ginza (3N)",
+      "name": "Super Hotel Premier Ginza",
+      "note": "Natural onsen · connecting suite · welcome bar",
+      "url": "https://www.superhotel.co.jp/s_hotels/ginza/",
+      "mapsQuery": "Super Hotel Premier Ginza Tokyo"
     },
     {
-      "stop": "Stop 7C · Tokyo Asakusa (3N)",
-      "name": "Dormy Inn EXPRESS Asakusa",
-      "note": "10F Skytree bath · free ramen · direct Haneda",
-      "url": "https://dormy-hotels.com/dormyinn/hotels/asakusa/rooms/",
-      "mapsQuery": "Dormy Inn Express Asakusa Tokyo"
+      "stop": "Stop 7C · Ginza 3-chome (3N)",
+      "name": "Sotetsu Fresa Inn Ginza-Sanchome",
+      "note": "Best 2+2+1 Twin+Solo value · Serta beds",
+      "url": "https://en.sotetsu-hotels.com/fresa-inn/ginza3/rooms/",
+      "mapsQuery": "Sotetsu Fresa Inn Ginza-Sanchome Tokyo"
+    },
+    {
+      "stop": "Stop 7D · Kyobashi / Tokyo Stn (3N)",
+      "name": "remm Tokyo Kyobashi",
+      "note": "Live Oct 2027 · 7 min Tokyo Stn · 12 PM checkout",
+      "url": "https://www.hankyu-hotel.com/en/hotel/remm/tokyo-kyobashi/accommodation",
+      "mapsQuery": "remm Tokyo Kyobashi Tokyo"
+    },
+    {
+      "stop": "Stop 7E · Hibiya / Yurakucho (3N)",
+      "name": "remm Hibiya",
+      "note": "Midtown Hibiya · massage chair · S$341 Dbl RO",
+      "url": "https://www.hankyu-hotel.com/en/hotel/remm/hibiya/accommodation",
+      "mapsQuery": "remm Hibiya Tokyo"
     }
   ]
 }
