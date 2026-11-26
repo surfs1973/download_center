@@ -1,0 +1,745 @@
+{
+  "version": "2027.1",
+  "config": {
+    "defaultFxRate": 123.92,
+    "totalNights": 16,
+    "tripDays": 17,
+    "flightsEstSgd": 1400,
+    "dailySpendGrossSgd": 100,
+    "breakfastValueSgd": 12,
+    "halfBoardDinnerValueSgd": 25,
+    "auditDataUrl": "https://raw.githubusercontent.com/surfs1973/download_center/refs/heads/main/all_scraped_rates_2027.json",
+    "hokkaidoDriveGmapsUrl": "https://www.google.com/maps/dir/New+Chitose+Airport/La+Vista+Furano+Hills/Noboribetsu+Onsenkyo+Takinoya/The+Lake+View+Toya+Nonokaze+Resort/TOKYU+STAY+Hakodate-Asaichi+Akari+no+Yu"
+  },
+  "stops": [
+    {
+      "id": 1,
+      "city": "Tokyo (Haneda)",
+      "dates": "Oct 15–16",
+      "nights": 1,
+      "transit": "Oct 15 · Fly Singapore to Tokyo (overnight transit inside Terminal 2)",
+      "routeNote": "Arrive from Singapore, sleep right inside Terminal 2, and walk straight to domestic departures for New Chitose the next morning.",
+      "baselineOptionId": "1A",
+      "lockedModes": ["M2"],
+      "mode2LockNote": "Locked to 1A Shared 3+2 in Mode 2. Switch to Hybrid mode to see the +{{diff:17968-12232}}/sib solo room option.",
+      "gridCols": "md:grid-cols-2",
+      "guide": {
+        "hotels": [
+          {
+            "name": "Haneda Excel Hotel Tokyu",
+            "summary": "Calm, design-led airport hotel directly inside Haneda Terminal 2 with warm Scandinavian interiors and soundproof glass.",
+            "location": "Inside Haneda Terminal 2 departure lobby. ~1 min walk to Terminal 2 Station and ~3 min to the observation deck.",
+            "baths": "Private en-suite bathroom in each room (no public onsen).",
+            "meals": "Room Only. On-site Flyers Table restaurant and bar available, plus Terminal 2 cafés/konbini right downstairs.",
+            "facilities": "Direct Terminal 2 departure lobby access, 24-hr front desk, luggage storage, floor vending/ice rooms with microwave."
+          }
+        ],
+        "verdict": {
+          "M1": "Pick 1A Shared 3+2 if you treat Haneda as a quick sleep stop and want to save {{diff:17968-12232}}/sib. Pick 1B Solo (+{{diff:17968-12232}}/sib) if you want Sister to have her own 19 m² room (140 cm bed) and a second bathroom right off the SG flight.",
+          "M2": "In All 3+2 mode, Stop 1 stays locked to 1A ({{sgd:12232}}/sib) — ideal for a quick 1-night transit sleep before flying north."
+        }
+      },
+      "options": [
+        {
+          "id": "1A",
+          "name": "Haneda Excel — Shared 3+2 Setup",
+          "shortName": "Haneda Excel (3+2)",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 12232, "M2": 12232 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Parents + Sister: 29 m² Triple (2 beds + extra bed) · Brothers: 23 m² Standard Twin (2 proper beds)",
+          "tradeOffs": [
+            "Inside Terminal 2 — walk straight downstairs to morning CTS check-in",
+            "Saves {{diff:17968-12232}}/sib vs. booking a solo room for one quick transit night",
+            "Brothers get a proper 23 m² Twin with zero extra beds"
+          ],
+          "mathNote": "Official Tokyu Hotels Free TCM Member (Apr 9–10, 2027 proxy, EB60 Free Cancel): Brothers 23 m² Twin ¥27,150 + 1/3 of Parents+Sister 29 m² Triple (¥28,641 ÷ 3 = ¥9,547) = ¥36,697 sibling pool ÷ 3 = ¥12,232/sib.",
+          "proxyFootnote": "Free cancel until 14:59 day prior. Excludes Tokyo accommodation tax.",
+          "link": "https://www.tokyuhotels.co.jp/en/haneda-e/stay/room/index.html",
+          "mapsQuery": "Haneda Excel Hotel Tokyu Tokyo",
+          "mapArea": "Haneda Terminal 2 · Inside Departure Lobby"
+        },
+        {
+          "id": "1B",
+          "name": "Haneda Excel — Sister Solo Room",
+          "shortName": "Haneda Excel (Solo)",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": false },
+          "hideInMode2": true,
+          "jpy": { "M1": 17968, "M2": 17968 },
+          "roomBadge": "Sister Solo Room (2+2+1)",
+          "roomBreakdown": "Brothers: 23 m² Standard Twin · Sister (Solo): 19 m² Excel Single (wide 140 cm bed) · 42 m² combined",
+          "tradeOffs": [
+            "Sister gets her own private room & bathroom right off the SG flight",
+            "Zero extra beds across the entire family; easy morning bathroom routine",
+            "Generous 42 m² combined space to open luggage before Hokkaido"
+          ],
+          "mathNote": "Official Free TCM Member (Apr 9–10, 2027 proxy): Brothers 23 m² Twin ¥27,150 + Sister 19 m² Excel Single ¥26,753 = ¥53,903 sibling pool ÷ 3 = ¥17,968/sib (+{{diff:17968-12232}}/sib vs. 1A).",
+          "proxyFootnote": "Free cancel until 14:59 day prior. Excludes Tokyo accommodation tax.",
+          "link": "https://www.tokyuhotels.co.jp/en/haneda-e/stay/room/index.html",
+          "mapsQuery": "Haneda Excel Hotel Tokyu Tokyo",
+          "mapArea": "Haneda Terminal 2 · Inside Departure Lobby"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "city": "Furano / Biei",
+      "dates": "Oct 16–18",
+      "nights": 2,
+      "transit": "Oct 16 · Fly Haneda → New Chitose, pick up rental car & drive ~2 hr to Furano",
+      "routeNote": "Biei patchwork road, Tomita Farm, Cheese Factory, Shikisai-no-Oka & Shirogane Blue Pond on Oct 17.",
+      "baselineOptionId": "2A_BF",
+      "gridCols": "md:grid-cols-2",
+      "guide": {
+        "hotels": [
+          {
+            "name": "La Vista Furano Hills (Option 2A)",
+            "summary": "Modern 2019 hot-spring resort 3 min from JR Furano Station with 9F panoramic baths, 3 free private onsens, and Hokkaido seafood breakfast.",
+            "location": "3-min walk from JR Furano Station in town centre with many nearby restaurants; free first-come guest parking.",
+            "baths": "9F rooftop natural hot-spring baths (open-air + sauna) PLUS 3 free private family baths (no extra charge).",
+            "meals": "Optional seafood buffet breakfast at Ginsai Furano (6:30–9:30 am). Free nightly Yonaki Soba ramen after 10 pm.",
+            "facilities": "Manga library, free massage chairs, post-bath ice cream & probiotic drinks, lobby coffee bar, free laundry, 11 AM checkout.",
+            "videoUrl": "https://www.youtube.com/watch?v=jrWyW_w_UAE",
+            "videoLabel": "Watch La Vista Furano walkthrough (YouTube)"
+          },
+          {
+            "name": "Furano Natulux Hotel (Option 2B)",
+            "summary": "Minimalist boutique hotel 1 min from JR Furano Station — literally next door to La Vista — at roughly half the price.",
+            "location": "1-min walk from JR Furano Station (next door to La Vista); 30 free guest parking spaces.",
+            "baths": "Modest 1F/2F indoor artificial mineral public bath + men’s sauna / women’s bedrock bath (¥1,050/60m). No rooftop or private onsen.",
+            "meals": "Optional plated Japanese/Western set breakfast at Natural Dining (+S$32/sib for 2 mornings) or skip for town cafés.",
+            "facilities": "Minimalist rooms, quiet boutique lobby, 10 AM checkout; free cancellation closes 8 days prior (vs. 1 day at La Vista)."
+          }
+        ],
+        "verdict": {
+          "M1": "Pick La Vista (2A) if you want the 9F rooftop onsen, 3 free private baths, and famous seafood buffet. Pick Natulux RO (2B) to save {{diff:36450-15753}}/sib, give Sister her own 16 m² solo room, and save the onsen splurge for Noboribetsu & Toya right after.",
+          "M2": "Pick La Vista (2A) for the 9F onsen, 3 private baths, seafood buffet & zero booking risk. Pick Natulux RO (2B) to save {{diff:36450-16491}}/sib with larger 3+2 rooms (39 m² + 22 m²) — just note the 39 m² Supreme Twin is 1-of-1 and needs day-one booking."
+        }
+      },
+      "options": [
+        {
+          "id": "2A_BF",
+          "name": "La Vista Furano Hills — Breakfast Incl.",
+          "shortName": "La Vista (BF)",
+          "mealTag": "Breakfast Incl.",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 36450, "M2": 36450 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Parents + Sister: 37 m² Deluxe Twin (2 beds + extra bed) · Brothers: 18 m² Hollywood Twin",
+          "tradeOffs": [
+            "Newer 2019 resort · 9F rooftop onsen + 3 free private baths",
+            "Famous Hokkaido seafood buffet breakfast + free nightly ramen",
+            "Relaxed 11:00 AM checkout & low booking risk"
+          ],
+          "mathNote": "Official Dormy Hotels (Apr 10–12, 2027 proxy, tax incl.): Brothers 18 m² Hollywood Twin ¥68,400 + 1/3 of Parents+Sister 37 m² Deluxe (¥122,850 ÷ 3 = ¥40,950) = ¥109,350 sibling pool ÷ 3 = ¥36,450/sib.",
+          "proxyFootnote": "Live Oct 16–18 La Vista 3+2 BF is ~S$344/sib; Natulux gap holds ~1.7×–1.9×. Excludes Furano tax.",
+          "link": "https://dormy-hotels.com/dormyinn/hotels/furano/",
+          "mapsQuery": "La Vista Furano Hills Hokkaido",
+          "mapArea": "3 min walk to JR Furano Station"
+        },
+        {
+          "id": "2A_RO",
+          "name": "La Vista Furano Hills — Room Only",
+          "shortName": "La Vista (RO)",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 31050, "M2": 31050 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Parents + Sister: 37 m² Deluxe Twin · Brothers: 18 m² Hollywood Twin (same rooms, skip buffet)",
+          "tradeOffs": [
+            "Same 9F rooftop onsen, 3 free private baths & free late-night ramen",
+            "Skip the breakfast buffet to save {{diff:36450-31050}}/sib (note: adds S$24 back into Meals budget)",
+            "Same relaxed 11:00 AM checkout"
+          ],
+          "mathNote": "Official Dormy Hotels Room Only (Apr 10–12, 2027 proxy): Brothers 18 m² Twin ¥57,600 + 1/3 of 37 m² Deluxe ¥35,550 = ¥93,150 sibling pool ÷ 3 = ¥31,050/sib.",
+          "proxyFootnote": "Free cancel until 1 day prior. Excludes Furano accommodation tax.",
+          "link": "https://dormy-hotels.com/dormyinn/hotels/furano/",
+          "mapsQuery": "La Vista Furano Hills Hokkaido",
+          "mapArea": "3 min walk to JR Furano Station"
+        },
+        {
+          "id": "2B_BF",
+          "name": "Furano Natulux — Breakfast Incl.",
+          "shortName": "Natulux (BF)",
+          "mealTag": "Set Breakfast",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": false },
+          "jpy": { "M1": 19713, "M2": 20451 },
+          "roomBadge": {
+            "M1": "Sister Solo Room (2+2+1)",
+            "M2": "3+2 · Sister w/ Parents"
+          },
+          "roomBreakdown": {
+            "M1": "Brothers: 22 m² Standard Twin (2× 120 cm) · Sister (Solo): 16 m² Casual Double · 38 m² combined, 2 bathrooms",
+            "M2": "Parents + Sister: 39 m² 7F Supreme Twin (1-of-1) · Brothers: 22 m² Standard Twin"
+          },
+          "tradeOffs": {
+            "M1": [
+              "Right next door to La Vista; Sister gets her own 16 m² room + 2 bathrooms",
+              "Curated plated set breakfast; steady multi-room inventory",
+              "Smaller indoor bath (no rooftop/private onsen); 10 AM checkout"
+            ],
+            "M2": [
+              "Bigger 3+2 rooms next door to La Vista (39 m² Supreme + 22 m² Twin)",
+              "Dropping Bros to 18 m² Casual Twin trims another −{{diff:20451-19755}}/sib (to {{sgd:19755}})",
+              "Catch: 39 m² Supreme Twin is 1-of-1 (day-one booking); indoor bath only, 10 AM checkout"
+            ]
+          },
+          "mathNote": {
+            "M1": "Official DirectIn Free Member (Apr 10–12, 2027 proxy): Brothers 22 m² Twin ¥38,286 + Sister 16 m² Casual Double ¥20,853 = ¥59,139 ÷ 3 = ¥19,713/sib.",
+            "M2": "Official DirectIn Free Member (Apr 10–12, 2027 proxy): Brothers 22 m² Std Twin ¥38,286 + 1/3 of Parents+Sis 39 m² Supreme Twin (¥69,201 ÷ 3 = ¥23,067) = ¥61,353 ÷ 3 = ¥20,451/sib. Optional 18 m² Casual Twin for Bros drops this by −{{diff:20451-19755}}/sib to {{sgd:19755}}/sib (¥19,755)."
+          },
+          "proxyFootnote": {
+            "M1": "Free cancel closes 8 days prior. Steady Main Building inventory. Excludes Furano tax.",
+            "M2": "Supreme Twin (39 m²) is a 1-of-1 room requiring day-one booking; 18 m² Casual Twin trims −{{diff:20451-19755}}/sib. Free cancel closes 8 days prior."
+          },
+          "link": "https://www.natulux.com/en/guest/index.html",
+          "mapsQuery": "Furano Natulux Hotel Hokkaido",
+          "mapArea": "1 min walk to JR Furano Station"
+        },
+        {
+          "id": "2B_RO",
+          "name": "Furano Natulux — Room Only",
+          "shortName": "Natulux (RO)",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": false },
+          "jpy": { "M1": 15753, "M2": 16491 },
+          "roomBadge": {
+            "M1": "Sister Solo Room (2+2+1)",
+            "M2": "3+2 · Sister w/ Parents"
+          },
+          "roomBreakdown": {
+            "M1": "Brothers: 22 m² Standard Twin (2× 120 cm) · Sister (Solo): 16 m² Casual Double · 38 m² combined, 2 bathrooms",
+            "M2": "Parents + Sister: 39 m² 7F Supreme Twin (1-of-1) · Brothers: 22 m² Standard Twin"
+          },
+          "tradeOffs": {
+            "M1": [
+              "Biggest Furano savings (−{{diff:36450-15753}}/sib vs. La Vista BF) before 4 onsen resort nights",
+              "Sister gets her own 16 m² room & bathroom; steady Main Building inventory",
+              "Ideal for sightseeing-heavy Biei/Furano days; indoor bath only, 10 AM checkout"
+            ],
+            "M2": [
+              "Biggest Furano savings (−{{diff:36450-16491}}/sib vs. La Vista BF) before 4 onsen resort nights",
+              "Dropping Bros to 18 m² Casual Twin trims another −{{diff:16491-15795}}/sib (to {{sgd:15795}})",
+              "Catch: 39 m² Supreme Twin is 1-of-1 (day-one booking); indoor bath only, 10 AM checkout"
+            ]
+          },
+          "mathNote": {
+            "M1": "Official DirectIn Free Member Room Only (Apr 10–12, 2027 proxy): Brothers 22 m² Twin ¥30,366 + Sister 16 m² Casual Double ¥16,893 = ¥47,259 ÷ 3 = ¥15,753/sib.",
+            "M2": "Official DirectIn Free Member Room Only (Apr 10–12, 2027 proxy): Brothers 22 m² Std Twin ¥30,366 + 1/3 of Parents+Sis 39 m² Supreme Twin (¥57,321 ÷ 3 = ¥19,107) = ¥49,473 ÷ 3 = ¥16,491/sib. Optional 18 m² Casual Twin trims −{{diff:16491-15795}}/sib to {{sgd:15795}}/sib (¥15,795)."
+          },
+          "proxyFootnote": {
+            "M1": "Free cancel closes 8 days prior. Steady Main Building inventory. Excludes Furano tax.",
+            "M2": "Supreme Twin (39 m²) is a 1-of-1 room requiring day-one booking; 18 m² Casual Twin trims −{{diff:16491-15795}}/sib. Free cancel closes 8 days prior."
+          },
+          "link": "https://www.natulux.com/en/guest/index.html",
+          "mapsQuery": "Furano Natulux Hotel Hokkaido",
+          "mapArea": "1 min walk to JR Furano Station"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "city": "Noboribetsu",
+      "dates": "Oct 18–20",
+      "nights": 2,
+      "transit": "Oct 18 · Drive ~3.5 hr from Furano to Noboribetsu",
+      "routeNote": "Jigokudani (Hell Valley), Oyunuma natural foot bath, kaiseki dinners & a full free rest day on Oct 19.",
+      "baselineOptionId": "3A",
+      "gridCols": "md:grid-cols-2",
+      "guide": {
+        "hotels": [
+          {
+            "name": "Noboribetsu Onsenkyo Takinoya (Option 3A)",
+            "summary": "Refined 5-star ryokan sanctuary in the heart of Noboribetsu Onsen town with 4 distinct spring waters, forest rotenburo, and private dining rooms.",
+            "location": "Heart of Noboribetsu Onsen town. ~8–10 min walk to Jigokudani (Hell Valley); ~25–35 min forest trail (or short drive) to Oyunuma foot bath.",
+            "baths": "4 spring water types + forest open-air bath + sauna. Parents + Sister’s Type D room also has its own private open-air bath.",
+            "meals": "Half Board included: seasonal Hokkaido kaiseki dinner & Japanese breakfast (Western on request) served in private dining rooms at Genshirin.",
+            "facilities": "Japanese garden, fireplace lounge (free coffee/tea), Counter Bar Shirakaba, spa salon, 11 AM checkout, low booking risk."
+          },
+          {
+            "name": "Takinoya Bekkan Tamanoyu (Option 3B)",
+            "summary": "Cozy, rustic 24-room traditional inn just off the main street with milky-white sulfur hot springs and hearth-style robatayaki kaiseki.",
+            "location": "Just off Noboribetsu Onsen main street (~8 min walk to Hell Valley); 24 free parking spaces.",
+            "baths": "Free-flowing sulfur spring (2 pm–midnight & 5–9:30 am) + bookable private open-air family bath (~S$22 / 50 min, 2–11:50 pm). No sauna.",
+            "meals": "Half Board included: Hokkaido kaiseki with charcoal-grilled robatayaki (Std or Wagyu upgrade) & Japanese breakfast (7:30–9 am) in 2F dining hall Hatsune.",
+            "facilities": "Sunken irori hearth lobby, tatami hallways, yukata/samue, 10 AM checkout. Catch: only 3 en-suite rooms in the entire inn."
+          }
+        ],
+        "verdict": "Pick Takinoya (3A) to make our Oct 19 rest day a true 5-star ryokan splurge (4 springs, private dining, 65 m² / 83 m² rooms, easy booking). Pick Tamanoyu (3B) to save {{diff:77616-49947}}–{{diff:77616-44557}}/sib with a cozy wooden inn and bookable private family bath — if we snag 2 of the 3 en-suite rooms day-one."
+      },
+      "options": [
+        {
+          "id": "3A",
+          "name": "Noboribetsu Onsenkyo Takinoya",
+          "shortName": "Takinoya (5★)",
+          "mealTag": "Half Board · Kaiseki",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 2,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 77616, "M2": 77616 },
+          "roomBadge": "3+2 · Capped at Type AW ÷ 3",
+          "roomBreakdown": "Parents + Sister: Type D (83 m² w/ Open-air Bath) · Brothers: Type AW (65 m²) — sibling cost capped at Type AW ÷ 3 ({{sgd:77616}}/sib)",
+          "tradeOffs": [
+            "True 5-star ryokan splurge for our Oct 19 full rest day",
+            "4 spring waters + forest rotenburo + sauna + private dining rooms",
+            "Fireplace garden lounge, 11 AM checkout & easy booking"
+          ],
+          "mathNote": "JAPANiCAN (Apr 12–14, 2027 Mon–Wed proxy, Half Board Kaiseki, tax incl.): Sibling cost stays capped at Type AW (65 m²) room rate ¥232,848 ÷ 3 = ¥77,616/sib even with Sister staying in Parents’ 83 m² Type D.",
+          "proxyFootnote": "Every room has an en-suite bath; steady availability. Excludes local & ¥300/pax/nt bathing tax.",
+          "link": "http://www.takinoya.co.jp/roomtype/",
+          "mapsQuery": "Noboribetsu Onsenkyo Takinoya Hokkaido",
+          "mapArea": "Noboribetsu Onsen · 8 min to Hell Valley"
+        },
+        {
+          "id": "3B_STD",
+          "name": "Takinoya Bekkan Tamanoyu — Standard Kaiseki",
+          "shortName": "Tamanoyu (Std)",
+          "mealTag": "Half Board · Std",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 2,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 44557, "M2": 44557 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Parents + Sister: 3p Two-Room Jap-West (~40 m² w/ unit bath) · Brothers: 2p Two-Room Jap-West (2 semi-double beds)",
+          "tradeOffs": [
+            "Cozy rustic 24-room inn with bookable private open-air bath (~S$22/50m)",
+            "Charcoal-grilled robatayaki kaiseki in 2F dining hall",
+            "Catch: only 3 en-suite rooms exist (high day-one booking risk); 10 AM checkout"
+          ],
+          "mathNote": "JAPANiCAN 3+2 (Apr 12–14, 2027 proxy, Half Board Standard): Brothers 2p room ¥90,552 + 1/3 of Parents+Sis 3p room ¥43,120 = ¥133,672 sibling pool ÷ 3 = ¥44,557/sib.",
+          "proxyFootnote": "High booking risk (only 3 en-suite rooms in property). Excludes local & ¥300/pax/nt bathing tax.",
+          "link": "https://att-ryokan.net/en/hokkaido/tamanoyu",
+          "secondaryLink": "https://www.booking.com/hotel/jp/long-nai-jia-bie-guan-yu-nai-tang.html",
+          "secondaryLinkLabel": "Room Photos ↗",
+          "mapsQuery": "Takinoya Bekkan Tamanoyu Noboribetsu",
+          "mapArea": "Noboribetsu Onsen · 8 min to Hell Valley"
+        },
+        {
+          "id": "3B_WAGYU",
+          "name": "Takinoya Bekkan Tamanoyu — Wagyu Upgrade",
+          "shortName": "Tamanoyu (Wagyu)",
+          "mealTag": "Half Board · Wagyu",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 2,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 49947, "M2": 49947 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Same 3+2 Two-Room Jap-West rooms (~40 m² w/ unit bath) upgraded to Hokkaido Wagyu dinner",
+          "tradeOffs": [
+            "Upgrades both nights’ kaiseki to Hokkaido Wagyu dinner",
+            "Same cozy inn & bookable private open-air sulfur family bath",
+            "Same high booking risk (only 3 en-suite rooms) & 10 AM checkout"
+          ],
+          "mathNote": "JAPANiCAN 3+2 (Apr 12–14, 2027 proxy, Half Board Wagyu): Brothers 2p room ¥101,332 + 1/3 of Parents+Sis 3p room ¥48,510 = ¥149,842 sibling pool ÷ 3 = ¥49,947/sib.",
+          "proxyFootnote": "High booking risk (only 3 en-suite rooms in property). Excludes local & ¥300/pax/nt bathing tax.",
+          "link": "https://att-ryokan.net/en/hokkaido/tamanoyu",
+          "secondaryLink": "https://www.booking.com/hotel/jp/long-nai-jia-bie-guan-yu-nai-tang.html",
+          "secondaryLinkLabel": "Room Photos ↗",
+          "mapsQuery": "Takinoya Bekkan Tamanoyu Noboribetsu",
+          "mapArea": "Noboribetsu Onsen · 8 min to Hell Valley"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "city": "Lake Toya",
+      "dates": "Oct 20–22",
+      "nights": 2,
+      "transit": "Oct 20 · Drive ~1 hr from Noboribetsu to Lake Toya",
+      "routeNote": "Nightly lake fireworks from the room, Usuzan Ropeway, Showa Shinzan, lakeside walk & Le Vent buffet dinners.",
+      "baselineOptionId": "4A",
+      "gridCols": "md:grid-cols-2",
+      "guide": {
+        "hotels": [
+          {
+            "name": "The Lake View Toya Nonokaze Resort",
+            "summary": "Lakefront resort on the shore of Lake Toya famous for its panoramic 9F infinity onsen and fireworks views straight from the room.",
+            "location": "Directly on Toyako Onsen shore right in front of the sightseeing cruise pier; cafés & lakeside path steps away.",
+            "baths": "9F panoramic infinity lake-view onsen, sauna, and retro Showa no Yu public bath. (Rooms have shower booth only — no private bathtub.)",
+            "meals": "Half Board included: Le Vent / Nami no Oto lake-view buffet dinner & breakfast daily (live seafood, steak, sashimi stations).",
+            "facilities": "Club Lounge drinks/snacks (4A only), lakeside café, glass-art gallery, spa salon, karaoke, free parking.",
+            "videoUrl": "https://www.youtube.com/watch?v=sm3Um8x3VuM",
+            "videoLabel": "Watch Nonokaze Club room walkthrough (YouTube)"
+          }
+        ],
+        "verdict": "Pick 4A All in Club (+{{diff:56430-50857}}/sib) to keep the whole family in the renovated Oct 2022 Club building & elevators with Club Lounge snacks. Pick 4B Bros in Spa 7F (−{{diff:56430-50857}}/sib) for an easy saving while keeping identical lake/fireworks views, 9F infinity onsen & Le Vent buffet."
+      },
+      "options": [
+        {
+          "id": "4A",
+          "name": "Nonokaze Club Building — 56 m²",
+          "shortName": "Nonokaze Club (56 m²)",
+          "mealTag": "Half Board · Buffet",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 2,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 56430, "M2": 56430 },
+          "roomBadge": "3+2 · All in Club Wing",
+          "roomBreakdown": "Parents + Sister: 56 m² Club Jap-West · Brothers: 56 m² Club Deluxe Twin (same Oct 2022-renovated wing)",
+          "tradeOffs": [
+            "Whole family in the same renovated Club wing & elevators",
+            "Huge 56 m² lakefront lounge layout + Club Lounge drinks/snacks",
+            "Direct lake & fireworks view, 9F infinity onsen & Le Vent buffet"
+          ],
+          "mathNote": "Official Noguchi Kanko Free N Point Member (-5%, May 12–14, 2027 proxy, Half Board): Brothers 56 m² Club Twin ¥112,860 + 1/3 of Parents+Sis Club ¥56,430 = ¥169,290 sibling pool ÷ 3 = ¥56,430/sib.",
+          "proxyFootnote": "Free cancel, daily cleaning, tax incl. Both wings have shower booth only. Excludes onsite tax.",
+          "link": "https://en.nonokaze-resort.com/room",
+          "mapsQuery": "The Lake View Toya Nonokaze Resort Hokkaido",
+          "mapArea": "Lake Toya Shore · Right by Cruise Pier"
+        },
+        {
+          "id": "4B",
+          "name": "Spa Resort Building — Bros 36.8 m² Twin",
+          "shortName": "Nonokaze Spa (36.8 m²)",
+          "mealTag": "Half Board · Buffet",
+          "breakfastMornings": 2,
+          "halfBoardDinners": 2,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 50857, "M2": 50857 },
+          "roomBadge": "3+2 · Bros in Spa Wing",
+          "roomBreakdown": "Parents + Sister: stay in 56 m² Club · Brothers: move to connected Spa Resort 7F Standard Twin (36.8 m²)",
+          "tradeOffs": [
+            "Saves {{diff:56430-50857}}/sib while Parents + Sister keep the 56 m² Club room",
+            "Identical lake/fireworks view, 9F infinity onsen & Le Vent buffet",
+            "Catch: separate connected building/elevators & no Club Lounge for brothers"
+          ],
+          "mathNote": "Official Free Member (-5%, May 12–14, 2027 proxy): Brothers Spa 7F Twin ¥96,140 + 1/3 of Parents+Sis Club ¥56,430 = ¥152,570 sibling pool ÷ 3 = ¥50,857/sib (saves {{diff:56430-50857}}/sib vs. 4A).",
+          "proxyFootnote": "Free cancel, daily cleaning, tax incl. Shower booth only in both wings. Excludes onsite tax.",
+          "link": "https://en.nonokaze-resort.com/room",
+          "mapsQuery": "The Lake View Toya Nonokaze Resort Hokkaido",
+          "mapArea": "Lake Toya Shore · Connected Spa Wing"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "city": "Hakodate",
+      "dates": "Oct 22–25",
+      "nights": 3,
+      "transit": "Oct 22 · Drive ~2.5 hr to Hakodate & return the rental car",
+      "routeNote": "Mt. Hakodate night view, Morning Market, Kanemori Red Brick Warehouses, Motomachi & Onuma Park.",
+      "locked": true,
+      "baselineOptionId": "5A",
+      "guide": {
+        "hotels": [
+          {
+            "name": "TOKYU STAY Hakodate-Asaichi Akari no Yu",
+            "summary": "Locked-in base right beside Hakodate Morning Market with top-floor bay-view open-air baths and in-room washer-dryers.",
+            "location": "1-min walk to Hakodate Morning Market, 4 min to JR Hakodate Station, short walk to Kanemori Red Brick Warehouses.",
+            "baths": "Top-floor open-air hot-spring baths overlooking Hakodate & the bay (3:00 pm–1:00 am & 5:00–11:00 am).",
+            "meals": "Room Only — Morning Market seafood breakfast spots are literally 1 minute outside.",
+            "facilities": "In-room washer-dryer in BOTH sibling rooms, 17F panoramic lounge w/ complimentary drinks overlooking Mt. Hakodate, 24-hr desk."
+          }
+        ],
+        "verdict": "Locked in for all combinations — unbeatable Morning Market location, mid-trip in-room laundry, and scenic top-floor rotenburo."
+      },
+      "options": [
+        {
+          "id": "5A",
+          "name": "TOKYU STAY Hakodate-Asaichi Akari no Yu",
+          "shortName": "TOKYU STAY Hakodate",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": false },
+          "jpy": { "M1": 35478, "M2": 34428 },
+          "roomBadge": {
+            "M1": "Sister Solo Room (2+2+1)",
+            "M2": "3+2 · Sister w/ Parents"
+          },
+          "roomBreakdown": {
+            "M1": "Brothers: 19 m² Standard Twin (washer-dryer & mini kitchen) · Sister (Solo): 16 m² Comfort Double (washer-dryer) · 35 m² combined",
+            "M2": "Parents + Sister: 33 m² Corner Twin (JAPANiCAN) · Brothers: 19 m² Standard Twin (Official Member) · saves −{{diff:35478-34428}}/sib vs. Hybrid"
+          },
+          "highlight": {
+            "M1": "1 min to Morning Market, top-floor open-air bay bath, 17F Mt. Hakodate lounge & in-room washer-dryer in both rooms.",
+            "M2": "1 min to Morning Market, top-floor open-air bay bath, washer-dryer in both rooms & saves −{{diff:35478-34428}}/sib vs. Hybrid."
+          },
+          "mathNote": {
+            "M1": "Official Tokyu Stay Free Member (May 14–17, 2027 proxy, Room Only, daily refresh): Brothers 19 m² Std Twin ¥56,538 + Sister 16 m² Comfort Double ¥49,896 = ¥106,434 ÷ 3 = ¥35,478/sib.",
+            "M2": "Mixed channels (May 14–17, 2027 proxy): Brothers 19 m² Std Twin Official Member ¥56,538 + 1/3 of Parents+Sis 33 m² Corner Twin JAPANiCAN ¥46,746 = ¥103,284 ÷ 3 = ¥34,428/sib (saves −{{diff:35478-34428}}/sib vs. Hybrid). Upgrading Bros to 21 m² Hollywood Twin is {{sgd:36534}}/sib (¥36,534)."
+          },
+          "proxyFootnote": {
+            "M1": "Official Free Member (-10%), free cancellation, daily refresh. Excludes local tax.",
+            "M2": "Note: Upgrading Brothers from 19 m² Std Twin to 21 m² Hollywood Twin brings Mode 2 to {{sgd:36534}}/sib. Excludes local tax."
+          },
+          "link": "https://www.tokyustay.co.jp/en/hotel/hakodate-asaichi-hokkaido/room/",
+          "mapsQuery": "Tokyu Stay Hakodate Asaichi Akari no Yu",
+          "mapArea": "1 min to Morning Market · 4 min to JR Hakodate"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "city": "Sapporo",
+      "dates": "Oct 25–28",
+      "nights": 3,
+      "transit": "Oct 25 · Limited Express Hokuto train to Sapporo (~4 hr, scenic, no driving)",
+      "routeNote": "Otaru & Yoichi day trip, peak autumn Ginkgo Avenue, Odori Park, Nijo Market & Mt. Moiwa night view.",
+      "locked": true,
+      "baselineOptionId": "6A",
+      "guide": {
+        "hotels": [
+          {
+            "name": "THE GATE HOTEL Sapporo by HULIC",
+            "summary": "Brand-new boutique hotel (opened Dec 2025) 4 min from JR Sapporo Station with direct underground walkway access and 11F guests-only bath.",
+            "location": "4-min walk from JR Sapporo Station South Exit with direct underground walkway access; ~15 min walk to Hokkaido University Ginkgo Avenue.",
+            "baths": "11F guests-only public bath (2:00 pm–1:30 am & 6:00–10:00 am); rooms also feature full Japanese-style bathrooms with separate washing area & tub.",
+            "meals": "Room Only (all-day restaurant & bar Anchor Grill Sapporo on site, plus Sapporo Station eateries steps away).",
+            "facilities": "Guests-only fitness gym (6 am–11 pm), luggage storage, laundry/dry-cleaning service."
+          }
+        ],
+        "verdict": "Locked in for all combinations — brand-new Dec 2025 rooms, weather-proof underground walkway to JR Sapporo for Otaru, and full Japanese tubs."
+      },
+      "options": [
+        {
+          "id": "6A",
+          "name": "THE GATE HOTEL Sapporo by HULIC",
+          "shortName": "THE GATE HOTEL Sapporo",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 31522, "M2": 31522 },
+          "roomBadge": "3+2 · Sister w/ Parents",
+          "roomBreakdown": "Parents + Sister: 31 m² Scenic Hollywood Triple · Brothers: 26 m² Essential Twin (2 separate beds)",
+          "highlight": "Brand-new (opened Dec 2025), 4 min to JR Sapporo & underground walkway, 11F guests-only public bath & full Japanese bathrooms.",
+          "mathNote": "Apr 19–22, 2027 proxy: Brothers 26 m² Essential Twin on JAPANiCAN (¥67,350) + 1/3 of Parents+Sis 31 m² Triple on Official 90d EB Member (¥81,645 ÷ 3 = ¥27,215) = ¥94,565 sibling pool ÷ 3 = ¥31,522/sib.",
+          "proxyFootnote": "Mixed channels: Brothers' 26 m² Essential Twin on JAPANiCAN (¥67,350; sold out on Official) + 1/3 of Parents+Sister's 31 m² Triple on Official 90-day Early Bird Free Member (¥27,215). Free cancellation; excludes onsite Hokkaido/Sapporo accommodation tax.",
+          "link": "https://www.gate-hotel.jp/en/sapporo/",
+          "mapsQuery": "THE GATE HOTEL Sapporo by HULIC",
+          "mapArea": "4 min to JR Sapporo · Underground Walkway"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "city": "Tokyo (Ueno / Asakusa)",
+      "dates": "Oct 28–31",
+      "nights": 3,
+      "transit": "Oct 28 · Fly Sapporo (CTS) → Haneda (3 final free days in Tokyo)",
+      "routeNote": "Three free days in Tokyo for shopping, food & easy airport return.",
+      "subtleAreaNote": "Prefer a sleeker central area like Ginza? Let me know and we can shortlist Ginza instead.",
+      "baselineOptionId": "7B",
+      "gridCols": "md:grid-cols-2",
+      "guide": {
+        "hotels": [
+          {
+            "name": "Mitsui Garden Hotel Ueno (Option 7A)",
+            "summary": "Freshly renovated (2023) directly across from Ueno Station — best overall JR/Metro hub and proper twin beds for brothers.",
+            "location": "1 min to Tokyo Metro Ueno (Exit 1 w/ elevator), 2 min to JR Ueno (Yamanote/Shinkansen); 4–5 min flat walk to Ameyoko & Ueno Park.",
+            "baths": "En-suite modern bathrooms (no public bath).",
+            "meals": "Room Only (tons of cafés, konbini & Ameyoko spots outside; Bosco-il-chianti Italian restaurant on 1F).",
+            "facilities": "Coin laundry, microwaves, ice/vending, luggage shipping, 24-hr desk."
+          },
+          {
+            "name": "Super Hotel Ueno-Okachimachi (Option 7B)",
+            "summary": "High-value Okachimachi hub with 4 train lines in 1–4 min, free daily breakfast, welcome drink bar, and Sister’s own connected room.",
+            "location": "1 min Naka-Okachimachi (Hibiya), 2 min Ueno-Okachimachi (Oedo), 3 min JR Okachimachi (Yamanote), 4 min Ginza Line; 5–7 min walk to Akihabara.",
+            "baths": "Compact en-suite bathrooms (no public bath).",
+            "meals": "Complimentary buffet breakfast daily (7:00–9:30 am, takeaway available) + evening welcome drink bar.",
+            "facilities": "Pillow bar, coin laundry, luggage storage. Catch: 12 m² room is tight for 2 brothers sharing 1 double bed; desk closes 12 am–7 am."
+          },
+          {
+            "name": "Dormy Inn EXPRESS Asakusa (Option 7C)",
+            "summary": "Riverside Asakusa base facing Sumida River & Tokyo Skytree with 10F bath, free nightly ramen, and direct Toei Asakusa train to Haneda.",
+            "location": "2 min to Asakusa Stn (Ginza Line Exit 5), 5 min to Toei Asakusa Line (direct zero-transfer train to Haneda) & Senso-ji Temple. Further northeast off Yamanote.",
+            "baths": "10F Asahi-yu open-air bath, sauna & Skytree foot bath. Catch: rotates by gender (Thu men-only; Fri–Sat women 3–8 pm, men 8:30 pm–10 am).",
+            "meals": "Room Only. Free nightly Yonaki Soba ramen (9:30–11 pm), post-bath ice cream & morning probiotic drinks.",
+            "facilities": "10F scenic foot bath, laundry, shared microwave, 24-hr desk. Older 2009 renovation."
+          }
+        ],
+        "verdict": "Pick Mitsui Garden (7A, +{{diff:65613-48655}}/sib vs. 7B) for 2023 rooms, 2 proper twin beds for brothers, and the easiest JR hub. Pick Super Hotel (7B) for free daily breakfast, welcome drinks & Sister’s own adjoining room. Pick Dormy Inn Asakusa (7C, −{{diff:48655-39670}}/sib vs. 7B) for lowest cost, free ramen & direct Haneda train — if you don’t mind being further northeast and the rotating bath hours."
+      },
+      "options": [
+        {
+          "id": "7A",
+          "name": "Mitsui Garden Hotel Ueno",
+          "shortName": "Mitsui Garden Ueno",
+          "mealTag": "Room Only",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 65613, "M2": 65613 },
+          "roomBadge": "3+2 · Proper Twin Beds",
+          "roomBreakdown": "Parents + Sister: 25 m² Superior Twin + Sofa Bed · Brothers: 22 m² Standard Twin (2 separate beds)",
+          "tradeOffs": [
+            "Fresh 2023 renovation & proper separate twin beds for brothers",
+            "Best all-around JR Yamanote / Metro hub (1–2 min to Ueno Stn)",
+            "No free breakfast or public bath (adds S$36 into Meals vs. 7B)"
+          ],
+          "mathNote": "Official MGH Rewards 45-day Early Bird Free Member (Apr 22–25, 2027 proxy): Brothers 22 m² Std Twin ¥140,885 + 1/3 of Parents+Sis 25 m² Triple ¥55,955 = ¥196,840 sibling pool ÷ 3 = ¥65,613/sib.",
+          "proxyFootnote": "Free cancel, daily cleaning, tax incl. Excludes Tokyo accommodation tax.",
+          "link": "https://www.gardenhotels.co.jp/ueno/eng/room/",
+          "mapsQuery": "Mitsui Garden Hotel Ueno Tokyo",
+          "mapArea": "Ueno Hub · Right on JR Yamanote",
+          "transitLine": "1–2 min JR Ueno (Yamanote/Shinkansen), Ginza & Hibiya lines"
+        },
+        {
+          "id": "7B",
+          "name": "Super Hotel Ueno-Okachimachi",
+          "shortName": "Super Hotel Okachimachi",
+          "mealTag": "Free Breakfast",
+          "breakfastMornings": 3,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": true, "M2": true },
+          "jpy": { "M1": 48655, "M2": 48655 },
+          "roomBadge": "Sister Adjoining Room",
+          "roomBreakdown": "Parents + Sister: 24 m² Connecting Room (separate bedroom w/ internal door) · Brothers: 12 m² Double (1 double bed)",
+          "tradeOffs": [
+            "Free daily breakfast (saves S$36 in Meals) & evening welcome drink bar",
+            "4 train lines in 1–4 min (JR Yamanote, Hibiya, Oedo, Ginza); walk to Akihabara",
+            "Catch: 12 m² room is tight for 2 brothers sharing 1 double bed; desk closes 12–7 am"
+          ],
+          "mathNote": "Official Super Hotel (Apr 22–25, 2027 proxy, Free Breakfast): Brothers 12 m² Double ¥75,180 + ½ of 24 m² Connecting Suite ¥70,785 = ¥145,965 sibling pool ÷ 3 = ¥48,655/sib.",
+          "proxyFootnote": "Daily cleaning via door magnet; free cancel. Excludes Tokyo accommodation tax.",
+          "link": "https://www.superhotel.co.jp/s_hotels/okachimachi/",
+          "mapsQuery": "Super Hotel Ueno-Okachimachi Tokyo",
+          "mapArea": "Okachimachi · 4 Lines + Akihabara Walk",
+          "transitLine": "1–4 min Hibiya, Oedo, JR Yamanote & Ginza lines"
+        },
+        {
+          "id": "7C",
+          "name": "Dormy Inn EXPRESS Asakusa",
+          "shortName": "Dormy Inn Asakusa",
+          "mealTag": "Room Only · Ramen",
+          "breakfastMornings": 0,
+          "halfBoardDinners": 0,
+          "sisterSolo": { "M1": false, "M2": false },
+          "jpy": { "M1": 39670, "M2": 39670 },
+          "roomBadge": "3+2 · Shared Queen",
+          "roomBreakdown": "Parents + Sister: 27 m² Jap-West River View · Brothers: 20 m² Shared Queen River View (no bunks)",
+          "tradeOffs": [
+            "Lowest Tokyo cost; 10F Skytree bath + free nightly ramen; direct Haneda train",
+            "Further northeast off the Yamanote loop (2 min Ginza Line, 5 min Senso-ji)",
+            "Catch: bath rotates by gender (Thu men-only; Fri–Sat women 3–8 pm only); 2009 reno"
+          ],
+          "mathNote": "Official Dormy Standard planId=960 (Apr 22–25, 2027 proxy): Brothers 20 m² Shared Queen River View ¥78,390 (no bunks) + 1/3 of Parents+Sis 27 m² Jap-West ¥40,620 = ¥119,010 sibling pool ÷ 3 = ¥39,670/sib.",
+          "proxyFootnote": "Only 4 Jap-West rooms in property. Free cancel; excludes Tokyo accommodation tax.",
+          "link": "https://dormy-hotels.com/dormyinn/hotels/asakusa/rooms/",
+          "mapsQuery": "Dormy Inn Express Asakusa Tokyo",
+          "mapArea": "Asakusa Riverfront · Further Northeast",
+          "transitLine": "2 min Ginza Line · 5 min Toei Asakusa (direct Haneda)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "baseline",
+      "name": "The Comfort Baseline",
+      "tag": "Reference Pick",
+      "desc": "La Vista Furano, 5★ Takinoya, Nonokaze Club & Super Hotel w/ free breakfast.",
+      "picks": { "1": "1A", "2": "2A_BF", "3": "3A", "4": "4A", "7": "7B" }
+    },
+    {
+      "id": "smart",
+      "name": "Smart Value",
+      "tag": "Recommended",
+      "desc": "Save big on sightseeing-heavy Furano to keep the 5★ onsen resorts & upgrade Tokyo to proper twin beds.",
+      "picks": { "1": "1A", "2": "2B_RO", "3": "3A", "4": "4A", "7": "7A" }
+    },
+    {
+      "id": "budget",
+      "name": "Budget-Friendly",
+      "tag": "Lowest Likely",
+      "desc": "Natulux RO + Tamanoyu Std + Nonokaze Spa + Super Hotel for maximum savings.",
+      "picks": { "1": "1A", "2": "2B_RO", "3": "3B_STD", "4": "4B", "7": "7B" }
+    }
+  ],
+  "directory": [
+    {
+      "stop": "Stop 1 · Haneda (1N)",
+      "name": "Haneda Excel Hotel Tokyu",
+      "note": "Inside Terminal 2 departure lobby",
+      "url": "https://www.tokyuhotels.co.jp/en/haneda-e/stay/room/index.html",
+      "mapsQuery": "Haneda Excel Hotel Tokyu Tokyo"
+    },
+    {
+      "stop": "Stop 2A · Furano (2N)",
+      "name": "La Vista Furano Hills",
+      "note": "9F rooftop onsen + 3 free private baths",
+      "url": "https://dormy-hotels.com/dormyinn/hotels/furano/",
+      "mapsQuery": "La Vista Furano Hills Hokkaido"
+    },
+    {
+      "stop": "Stop 2B · Furano (2N)",
+      "name": "Furano Natulux Hotel",
+      "note": "Minimalist boutique next door to La Vista",
+      "url": "https://www.natulux.com/en/guest/index.html",
+      "mapsQuery": "Furano Natulux Hotel Hokkaido"
+    },
+    {
+      "stop": "Stop 3A · Noboribetsu (2N)",
+      "name": "Noboribetsu Onsenkyo Takinoya",
+      "note": "5★ luxury ryokan · 4 springs & private dining",
+      "url": "http://www.takinoya.co.jp/roomtype/",
+      "mapsQuery": "Noboribetsu Onsenkyo Takinoya Hokkaido"
+    },
+    {
+      "stop": "Stop 3B · Noboribetsu (2N)",
+      "name": "Takinoya Bekkan Tamanoyu",
+      "note": "Cozy 24-room inn + private sulfur family bath",
+      "url": "https://att-ryokan.net/en/hokkaido/tamanoyu",
+      "extraUrl": "https://www.booking.com/hotel/jp/long-nai-jia-bie-guan-yu-nai-tang.html",
+      "extraLabel": "Room Photos ↗",
+      "mapsQuery": "Takinoya Bekkan Tamanoyu Noboribetsu"
+    },
+    {
+      "stop": "Stop 4 · Lake Toya (2N)",
+      "name": "The Lake View Toya Nonokaze Resort",
+      "note": "Club 56 m² & Spa 36.8 m² · 9F infinity onsen",
+      "url": "https://en.nonokaze-resort.com/room",
+      "mapsQuery": "The Lake View Toya Nonokaze Resort Hokkaido"
+    },
+    {
+      "stop": "Stop 5 · Hakodate (3N · Locked)",
+      "name": "TOKYU STAY Hakodate-Asaichi Akari no Yu",
+      "note": "Morning Market · in-room washer-dryer",
+      "url": "https://www.tokyustay.co.jp/en/hotel/hakodate-asaichi-hokkaido/room/",
+      "mapsQuery": "Tokyu Stay Hakodate Asaichi Akari no Yu"
+    },
+    {
+      "stop": "Stop 6 · Sapporo (3N · Locked)",
+      "name": "THE GATE HOTEL Sapporo by HULIC",
+      "note": "Opened Dec 2025 · 4 min to JR Sapporo",
+      "url": "https://www.gate-hotel.jp/en/sapporo/",
+      "mapsQuery": "THE GATE HOTEL Sapporo by HULIC"
+    },
+    {
+      "stop": "Stop 7A · Tokyo Ueno (3N)",
+      "name": "Mitsui Garden Hotel Ueno",
+      "note": "2023 reno · best JR hub & twin beds",
+      "url": "https://www.gardenhotels.co.jp/ueno/eng/room/",
+      "mapsQuery": "Mitsui Garden Hotel Ueno Tokyo"
+    },
+    {
+      "stop": "Stop 7B · Tokyo Okachimachi (3N)",
+      "name": "Super Hotel Ueno-Okachimachi",
+      "note": "Free breakfast · 4 lines · connecting room",
+      "url": "https://www.superhotel.co.jp/s_hotels/okachimachi/",
+      "mapsQuery": "Super Hotel Ueno-Okachimachi Tokyo"
+    },
+    {
+      "stop": "Stop 7C · Tokyo Asakusa (3N)",
+      "name": "Dormy Inn EXPRESS Asakusa",
+      "note": "10F Skytree bath · free ramen · direct Haneda",
+      "url": "https://dormy-hotels.com/dormyinn/hotels/asakusa/rooms/",
+      "mapsQuery": "Dormy Inn Express Asakusa Tokyo"
+    }
+  ]
+}
