@@ -839,65 +839,99 @@
    */
   function renderRoomFootprintSvg(room, accent = 'pine') {
     const area = Math.max(11, Number(room.areaM2) || 18);
-    // Realistic hotel room proportions (~1 : 1.45 width-to-depth)
-    const roomW_m = Math.sqrt(area / 1.42);
+    // Horizontal hotel-room orientation (~1.42 : 1 width-to-depth) uses the card width cleanly
+    // and keeps all compact/standard Tokyo rooms (12–26 m²) at an identical 1:1 visual scale.
+    const roomW_m = Math.sqrt(area * 1.42);
     const roomH_m = area / roomW_m;
 
-    // Shared visual scale capped so huge 83 m² ryokan fits cleanly while Tokyo 12–25 m² stays true-to-scale against each other
-    const maxScalePxPerM = 34;
     const svgW = 300;
     const svgH = 195;
-    const pad = 20;
-    const pxPerM = Math.min(maxScalePxPerM, (svgW - pad * 2) / roomW_m, (svgH - pad * 2) / roomH_m);
+    const padX = 16;
+    const padT = 24;
+    const padB = 12;
+    const maxScalePxPerM = 34;
+    const pxPerM = Math.min(
+      maxScalePxPerM,
+      (svgW - padX * 2) / roomW_m,
+      (svgH - padT - padB) / roomH_m
+    );
 
     const rw = roomW_m * pxPerM;
     const rh = roomH_m * pxPerM;
     const ox = (svgW - rw) / 2;
-    const oy = (svgH - rh) / 2;
+    const oy = padT + (svgH - padT - padB - rh) / 2;
 
     const stroke = accent === 'plum' ? '#6B4E71' : accent === 'amber' ? '#9A6324' : '#2E5A47';
     const bedFill = accent === 'plum' ? '#F6F1F7' : accent === 'amber' ? '#FBF5EC' : '#EDF4F0';
+    const innerPad = Math.max(4, Math.min(6.5, 0.16 * pxPerM));
 
-    // Bathroom / entryway block (~3.4 m² for compact rooms, up to ~7 m² for suites)
-    const bathW = Math.min(rw * 0.42, (area < 20 ? 1.55 : area < 35 ? 1.85 : 2.3) * pxPerM);
-    const bathH = Math.min(rh * 0.34, (area < 20 ? 2.0 : 2.3) * pxPerM);
+    // Open 28" suitcase footprint laid flat (1.00 m wide × 0.75 m tall)
+    const suitW = 1.0 * pxPerM;
+    const suitH = 0.75 * pxPerM;
+    const bedLenPx = Math.min(1.95 * pxPerM, Math.max(24, rh - suitH - innerPad * 3));
 
-    // Draw beds along top/right wall (length 2.0 m)
-    const bedLenPx = Math.min(rh - bathH - 8, 2.0 * pxPerM);
-    const bedGap = 4;
-    const bedWidthsPx = room.beds.map((b) => (b.widthCm / 100) * pxPerM);
-    const totalBedsW = bedWidthsPx.reduce((a, b) => a + b, 0) + bedGap * Math.max(0, room.beds.length - 1);
-    const bedsScaleFit = totalBedsW > rw - 10 ? (rw - 10) / totalBedsW : 1;
+    // Top-left: Bathroom / Entry zone (never extends into the lower suitcase strip)
+    const bathW_m = area < 18 ? 1.45 : area < 35 ? 1.75 : 2.35;
+    const bathH_m = area < 18 ? 1.85 : area < 35 ? 2.0 : 2.4;
+    const bathW = Math.min(rw * 0.34, bathW_m * pxPerM);
+    const bathH = Math.min(innerPad + bedLenPx, bathH_m * pxPerM);
 
-    let bx = ox + rw - 6 - totalBedsW * bedsScaleFit;
-    const by = oy + 6;
+    // Top-right: Sleeping zone (strictly to the right of the bath)
+    const bedZoneLeft = ox + bathW + innerPad * 1.4;
+    const bedZoneRight = ox + rw - innerPad;
+    const availBedW = Math.max(20, bedZoneRight - bedZoneLeft);
+
+    const bedGap = Math.max(3, 0.14 * pxPerM);
+    const rawBedWidths = room.beds.map((b) => (b.widthCm / 100) * pxPerM);
+    const totalRawBedsW = rawBedWidths.reduce((a, b) => a + b, 0) + bedGap * Math.max(0, room.beds.length - 1);
+    const bedsFit = totalRawBedsW > availBedW ? availBedW / totalRawBedsW : 1;
+    const fittedTotalBedsW = totalRawBedsW * bedsFit;
+
+    let bx = bedZoneRight - fittedTotalBedsW;
+    const by = oy + innerPad;
     const bedsHtml = room.beds.map((b, i) => {
-      const bw = bedWidthsPx[i] * bedsScaleFit;
+      const bw = rawBedWidths[i] * bedsFit;
       const x = bx;
-      bx += bw + bedGap * bedsScaleFit;
+      bx += bw + bedGap * bedsFit;
       const isSis = Boolean(b.isSister || b.occupant === 'Sister');
       const bStroke = isSis ? '#6B4E71' : stroke;
       const bFill = isSis ? '#F6F1F7' : bedFill;
+      const pillowH = Math.max(4, Math.min(8, bedLenPx * 0.14));
+      const pillowW = Math.max(6, bw - 6);
       return `
-        <rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bedLenPx.toFixed(1)}" rx="3.5" fill="${bFill}" stroke="${bStroke}" stroke-width="1.3" ${b.isExtra ? 'stroke-dasharray="3 2"' : ''} />
+        <g>
+          <rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bedLenPx.toFixed(1)}" rx="3.5" fill="${bFill}" stroke="${bStroke}" stroke-width="1.3" ${b.isExtra ? 'stroke-dasharray="3 2"' : ''} />
+          <rect x="${(x + (bw - pillowW) / 2).toFixed(1)}" y="${(by + 3).toFixed(1)}" width="${pillowW.toFixed(1)}" height="${pillowH.toFixed(1)}" rx="2" fill="#FFFFFF" stroke="${bStroke}" stroke-width="0.8" opacity="0.9" />
+        </g>
       `;
     }).join('');
 
-    // Draw open 28" suitcases (0.75 m × 1.00 m open clamshell) in remaining floor area
-    const suitW = 0.75 * pxPerM;
-    const suitH = 1.0 * pxPerM;
+    // Open floor zone strictly BELOW both the bath and beds — guarantees zero overlap
     const numSuitcases = room.suitcases || 2;
-    const floorStartX = ox + bathW + 6;
-    const floorStartY = oy + rh - suitH - 6;
+    const floorTop = by + bedLenPx + innerPad;
+    const floorBottom = oy + rh - innerPad;
+    const floorAvailH = Math.max(10, floorBottom - floorTop);
+    const floorLeft = ox + innerPad;
+    const floorAvailW = Math.max(20, rw - innerPad * 2);
+
+    const suitGap = Math.max(4, 0.16 * pxPerM);
+    const rawSuitRowW = numSuitcases * suitW + Math.max(0, numSuitcases - 1) * suitGap;
+    const suitFit = rawSuitRowW > floorAvailW ? floorAvailW / rawSuitRowW : 1;
+    const drawSuitW = suitW * suitFit;
+    const drawSuitH = Math.min(suitH * suitFit, floorAvailH);
+    const drawGap = suitGap * suitFit;
+    const totalSuitW = numSuitcases * drawSuitW + Math.max(0, numSuitcases - 1) * drawGap;
+
+    const startSuitX = floorLeft + (floorAvailW - totalSuitW) / 2;
+    const startSuitY = floorTop + Math.max(0, (floorAvailH - drawSuitH) / 2);
+
     let suitcasesHtml = '';
     for (let i = 0; i < numSuitcases; i++) {
-      const sx = floorStartX + i * (suitW + 4);
-      const sy = sx + suitW <= ox + rw - 4 ? floorStartY : oy + bathH + 6;
-      const clampedX = Math.min(sx, ox + rw - suitW - 4);
+      const sx = startSuitX + i * (drawSuitW + drawGap);
       suitcasesHtml += `
         <g opacity="0.92">
-          <rect x="${clampedX.toFixed(1)}" y="${sy.toFixed(1)}" width="${suitW.toFixed(1)}" height="${suitH.toFixed(1)}" rx="2" fill="#9E4A35" fill-opacity="0.16" stroke="#9E4A35" stroke-width="1.1" />
-          <line x1="${clampedX.toFixed(1)}" y1="${(sy + suitH / 2).toFixed(1)}" x2="${(clampedX + suitW).toFixed(1)}" y2="${(sy + suitH / 2).toFixed(1)}" stroke="#9E4A35" stroke-width="0.9" stroke-dasharray="2 1.5" />
+          <rect x="${sx.toFixed(1)}" y="${startSuitY.toFixed(1)}" width="${drawSuitW.toFixed(1)}" height="${drawSuitH.toFixed(1)}" rx="2.5" fill="#9E4A35" fill-opacity="0.16" stroke="#9E4A35" stroke-width="1.15" />
+          <line x1="${(sx + drawSuitW / 2).toFixed(1)}" y1="${startSuitY.toFixed(1)}" x2="${(sx + drawSuitW / 2).toFixed(1)}" y2="${(startSuitY + drawSuitH).toFixed(1)}" stroke="#9E4A35" stroke-width="0.9" stroke-dasharray="2 1.5" />
         </g>
       `;
     }
@@ -920,13 +954,13 @@
           <rect x="0" y="0" width="${svgW}" height="${svgH}" rx="12" fill="#FAF8F4" />
           <!-- Room outer walls -->
           <rect x="${ox.toFixed(1)}" y="${oy.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" rx="4" fill="#FFFFFF" stroke="#1E211F" stroke-width="1.8" />
-          <!-- Bath / Entry zone -->
-          <rect x="${ox.toFixed(1)}" y="${(oy + rh - bathH).toFixed(1)}" width="${bathW.toFixed(1)}" height="${bathH.toFixed(1)}" fill="#F2EFE9" stroke="#D7D1C4" stroke-width="1" />
-          <text x="${(ox + bathW / 2).toFixed(1)}" y="${(oy + rh - bathH / 2 + 3).toFixed(1)}" text-anchor="middle" fill="#838781" font-family="Inter, sans-serif" font-size="8" font-weight="600">Bath</text>
+          <!-- Top-left Bath / Entry zone -->
+          <rect x="${ox.toFixed(1)}" y="${oy.toFixed(1)}" width="${bathW.toFixed(1)}" height="${bathH.toFixed(1)}" fill="#F2EFE9" stroke="#D7D1C4" stroke-width="1" />
+          <text x="${(ox + bathW / 2).toFixed(1)}" y="${(oy + bathH / 2 + 3).toFixed(1)}" text-anchor="middle" fill="#838781" font-family="Inter, sans-serif" font-size="8.5" font-weight="600">Bath</text>
           ${bedsHtml}
           ${suitcasesHtml}
           <!-- Dimensions label -->
-          <text x="${(ox + rw / 2).toFixed(1)}" y="${(oy - 5).toFixed(1)}" text-anchor="middle" fill="#575B57" font-family="Inter, sans-serif" font-size="9.5" font-weight="600">${area} m² (~${roomW_m.toFixed(1)}m × ${roomH_m.toFixed(1)}m)</text>
+          <text x="${(ox + rw / 2).toFixed(1)}" y="${(oy - 6).toFixed(1)}" text-anchor="middle" fill="#575B57" font-family="Inter, sans-serif" font-size="9.5" font-weight="600">${area} m² (~${roomW_m.toFixed(1)}m × ${roomH_m.toFixed(1)}m)</text>
         </svg>
       `,
     };
@@ -1035,22 +1069,23 @@
   function renderBedReferenceLadderSvg(highlightWidths) {
     const W = 720;
     const rowH = 34;
-    const padL = 175;
-    const padR = 54;
-    const padT = 34;
+    const padL = 165;
+    const padR = 44;
+    const padT = 40;
     const padB = 26;
     const maxCm = 195;
     const plotW = W - padL - padR;
     const H = padT + BED_LADDER_TIERS.length * rowH + padB;
     const cmToX = (cm) => padL + (cm / maxCm) * plotW;
 
-    // SG dashed reference verticals
+    // SG dashed reference verticals (stagger SG Single vs SG Super Single labels so they never crowd)
     const refLines = SG_MATTRESS_REFS.map((ref) => {
       const x = cmToX(ref.cm);
+      const topLabelY = ref.id === 'sg_super' ? padT - 24 : padT - 12;
       return `
         <g>
-          <line x1="${x.toFixed(1)}" y1="${padT - 8}" x2="${x.toFixed(1)}" y2="${H - padB + 4}" stroke="#9E4A35" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.55" />
-          <text x="${x.toFixed(1)}" y="${padT - 14}" text-anchor="middle" fill="#9E4A35" font-family="Inter, sans-serif" font-size="9" font-weight="700">${ref.shortLabel}</text>
+          <line x1="${x.toFixed(1)}" y1="${padT - 6}" x2="${x.toFixed(1)}" y2="${H - padB + 4}" stroke="#9E4A35" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.55" />
+          <text x="${x.toFixed(1)}" y="${topLabelY}" text-anchor="middle" fill="#9E4A35" font-family="Inter, sans-serif" font-size="9" font-weight="700">${ref.shortLabel}</text>
           <text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#838781" font-family="Inter, sans-serif" font-size="8.5" font-weight="600">${ref.cm} cm</text>
         </g>
       `;
