@@ -2,7 +2,8 @@
  * Hokkaido + Tokyo 2027 — Core Hotel Picker Module
  * Hosted on GitHub so hokkaido_tokyo_2027_hotel_picker.html stays a lightweight shell.
  * Loads trip_data_2027.json and audit_module.js, renders all 7 stops, Stop 7 Tokyo
- * configurator, Split-Screen Map Explorer (SVG + Google Maps), and Share/Load Picks.
+ * configurator, Split-Screen Map Explorer (SVG + Google Maps), Bed & Room Size Guide
+ * (Singapore mattress scale + open suitcase footprints), and Share/Load Picks.
  */
 (function (global) {
   'use strict';
@@ -44,6 +45,10 @@
     mapPaneMode: window.innerWidth >= 1024 ? 'split' : 'svg', // 'split' | 'svg' | 'gmaps'
     mapZoom: 16, // 16 = Street View | 14 = Area Context
     mapFocusedStopId: 1,
+    bedGuideOpen: false,
+    bedGuideTab: 'beds', // 'beds' | 'rooms'
+    bedGuideStopId: 7,
+    bedGuideOptId: null, // null = follows currently selected option at bedGuideStopId
     picks: { 1: '1A', 2: '2A_BF', 3: '3A', 4: '4A', 7: '7B' },
     openMathDrawers: {},
     openGuideDrawers: {},
@@ -52,6 +57,1368 @@
 
   let toastTimer = null;
   let initialized = false;
+
+  // ===================================================================
+  // SINGAPORE MATTRESS REFERENCE & BED/ROOM SPEC RESOLVER
+  // ===================================================================
+  const SG_MATTRESS_REFS = [
+    { id: 'sg_single', label: 'SG Single', shortLabel: 'SG Single', cm: 91 },
+    { id: 'sg_super', label: 'SG Super Single', shortLabel: 'SG Super Sgl', cm: 107 },
+    { id: 'sg_queen', label: 'SG Queen', shortLabel: 'SG Queen', cm: 152 },
+    { id: 'sg_king', label: 'SG King', shortLabel: 'SG King', cm: 183 },
+  ];
+
+  const BED_LADDER_TIERS = [
+    { id: 'extra', label: 'Extra / Folding / Sofa Bed', cm: 97, note: 'Common 3rd bed in Japanese 3+2 triples (~SG Single)' },
+    { id: 'futon', label: 'Japanese Tatami Futon', cm: 100, note: 'Full-length floor futon in Japanese-Western ryokan rooms' },
+    { id: 'twin_std', label: 'Standard JP Twin Bed', cm: 110, note: 'Typical single bed in a Japanese Twin (~SG Super Single)' },
+    { id: 'semi_dbl', label: 'JP Semi-Double / Wide Twin', cm: 120, note: 'Very comfy solo; tight if 2 adults share' },
+    { id: 'jp_double', label: 'JP Double Bed', cm: 140, note: '12 cm narrower than SG Queen — cozy for 2, roomy solo' },
+    { id: 'jp_wide_dbl', label: 'JP Wide Double', cm: 150, note: 'Virtually identical to a Singapore Queen (152 cm)' },
+    { id: 'jp_queen', label: 'JP Queen Bed', cm: 160, note: '8 cm wider than a Singapore Queen' },
+  ];
+
+  /**
+   * Translates a mattress width (cm) and occupant count into a concise Singapore reference label.
+   */
+  function describeBedVsSg(cm, sleepers = 1) {
+    if (sleepers >= 2) {
+      const diffQueen = cm - 152;
+      if (cm <= 125) {
+        return {
+          text: `${Math.abs(diffQueen)} cm < SG Queen (tight for 2)`,
+          tone: 'amber',
+        };
+      }
+      if (cm <= 145) {
+        return {
+          text: `${Math.abs(diffQueen)} cm narrower than SG Queen`,
+          tone: 'amber',
+        };
+      }
+      if (cm <= 155) {
+        return {
+          text: '≈ SG Queen (152 cm)',
+          tone: 'pine',
+        };
+      }
+      return {
+        text: `+${diffQueen} cm wider than SG Queen`,
+        tone: 'pine',
+      };
+    }
+    // Single sleeper on this mattress
+    if (cm <= 98) {
+      return { text: `≈ SG Single (+${Math.max(0, cm - 91)} cm)`, tone: 'amber' };
+    }
+    if (cm <= 114) {
+      return { text: '≈ SG Super Single (107 cm)', tone: 'pine' };
+    }
+    if (cm <= 128) {
+      return { text: `+${cm - 107} cm > SG Super Single`, tone: 'pine' };
+    }
+    if (cm <= 146) {
+      return { text: 'Nearly SG Queen (solo!)', tone: 'plum' };
+    }
+    return { text: '≈ SG Queen (solo!)', tone: 'plum' };
+  }
+
+  /**
+   * Parses explicit room m² and bed cm mentions from a roomBreakdown clause
+   * so any JSON updates in trip_data_2027.json are reflected automatically.
+   */
+  function extractM2FromText(str, fallback) {
+    if (!str) return fallback;
+    const m = str.match(/(\d+(?:\.\d+)?)\s*m²/i);
+    return m ? parseFloat(m[1]) : fallback;
+  }
+
+  function extractCmFromText(str, fallback) {
+    if (!str) return fallback;
+    const m = str.match(/(\d{2,3})\s*cm/i);
+    return m ? parseInt(m[1], 10) : fallback;
+  }
+
+  /**
+   * Returns structured bed & room dimensions for BOTH rooms (Parents/Sister + Brothers)
+   * for any stop & resolved option. Respects optional `opt.bedSpecs` in JSON if present.
+   */
+  function getBedSpecsForOption(stop, opt, mode = state.mode) {
+    if (opt && opt.bedSpecs) {
+      const custom = opt.bedSpecs[mode] || opt.bedSpecs;
+      if (custom && custom.brothers && custom.parentsSister) return custom;
+    }
+
+    const breakdown = String(resolveField(opt.roomBreakdown, mode) || '');
+    const solo = isOptionSolo(opt, mode);
+    const hay = `${opt.name || ''} ${opt.shortName || ''} ${breakdown}`.toLowerCase();
+
+    // Split breakdown clauses to pull m² / cm hints per room if present
+    const parts = breakdown.split('·').map((s) => s.trim());
+    const broPart = parts.find((p) => /brothers/i.test(p)) || '';
+    const parPart = parts.find((p) => /parents/i.test(p)) || '';
+    const sisPart = parts.find((p) => /sister\s*\(solo\)|sister\s*:/i.test(p)) || '';
+
+    // ---- STOP 1: HANEDA EXCEL HOTEL TOKYU ----
+    if (stop.id === 1) {
+      const bros = {
+        label: 'Brothers’ Room (23 m² Standard Twin)',
+        areaM2: extractM2FromText(broPart, 23),
+        suitcases: 2,
+        beds: [
+          { widthCm: 110, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+          { widthCm: 110, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+        ],
+        note: 'Two proper ~SG Super Single beds with generous airport-room floor space.',
+      };
+      if (solo) {
+        return {
+          isSolo: true,
+          brothers: bros,
+          sisterSolo: {
+            label: 'Sister’s Solo Room (19 m² Excel Single)',
+            areaM2: extractM2FromText(sisPart, 19),
+            suitcases: 1,
+            beds: [{ widthCm: extractCmFromText(sisPart, 140), sleepers: 1, occupant: 'Sister', type: 'Wide Single / Double' }],
+            note: 'Sister gets a full 140 cm double bed all to herself plus her own bathroom right off the SG flight.',
+          },
+          parents: {
+            label: 'Parents’ Room (23 m² Standard Twin)',
+            areaM2: 23,
+            suitcases: 2,
+            beds: [
+              { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+              { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            ],
+            note: 'Zero extra beds — clean two-bed layout for Parents.',
+          },
+        };
+      }
+      return {
+        isSolo: false,
+        brothers: bros,
+        parentsSister: {
+          label: 'Parents + Sister (29 m² Triple)',
+          areaM2: extractM2FromText(parPart, 29),
+          suitcases: 3,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            { widthCm: 97, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Sister sleeps on a ~97 cm extra bed (slightly wider than an SG Single) for 1 quick transit night.',
+        },
+      };
+    }
+
+    // ---- STOP 2: FURANO / BIEI ----
+    if (stop.id === 2) {
+      if (/la\s*vista/i.test(hay)) {
+        return {
+          isSolo: false,
+          brothers: {
+            label: 'Brothers’ Room (18 m² Hollywood Twin)',
+            areaM2: extractM2FromText(broPart, 18),
+            suitcases: 2,
+            beds: [
+              { widthCm: 110, sleepers: 1, occupant: 'Bro 1', type: 'Hollywood Twin' },
+              { widthCm: 110, sleepers: 1, occupant: 'Bro 2', type: 'Hollywood Twin' },
+            ],
+            joinedBeds: true,
+            note: 'Two 110 cm beds pushed flush side-by-side (220 cm combined) with separate duvets.',
+          },
+          parentsSister: {
+            label: 'Parents + Sister (37 m² Deluxe Twin + Extra)',
+            areaM2: extractM2FromText(parPart, 37),
+            suitcases: 3,
+            beds: [
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Semi-Double' },
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Semi-Double' },
+              { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Extra / Daybed', isSister: true, isExtra: true },
+            ],
+            note: 'Spacious 37 m² resort room; Sister sleeps on a ~100 cm daybed/extra bed (~SG Super Single width).',
+          },
+        };
+      }
+      // Furano Natulux
+      const natBros = {
+        label: `Brothers’ Room (${extractM2FromText(broPart, 22)} m² Standard Twin)`,
+        areaM2: extractM2FromText(broPart, 22),
+        suitcases: 2,
+        beds: [
+          { widthCm: extractCmFromText(broPart, 120), sleepers: 1, occupant: 'Bro 1', type: 'Wide Twin' },
+          { widthCm: extractCmFromText(broPart, 120), sleepers: 1, occupant: 'Bro 2', type: 'Wide Twin' },
+        ],
+        note: 'Generous 120 cm wide twins (wider than SG Super Single) with solid floor space.',
+      };
+      if (solo) {
+        return {
+          isSolo: true,
+          brothers: natBros,
+          sisterSolo: {
+            label: `Sister’s Solo Room (${extractM2FromText(sisPart, 16)} m² Casual Double)`,
+            areaM2: extractM2FromText(sisPart, 16),
+            suitcases: 1,
+            beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed' }],
+            note: 'Sister gets a proper 140 cm Double bed & private bathroom all to herself (no extra bed!).',
+          },
+          parents: {
+            label: 'Parents’ Room (22 m² Standard Twin)',
+            areaM2: 22,
+            suitcases: 2,
+            beds: [
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Wide Twin' },
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Wide Twin' },
+            ],
+            note: 'Two roomy 120 cm beds with no extra bed taking up living space.',
+          },
+        };
+      }
+      return {
+        isSolo: false,
+        brothers: natBros,
+        parentsSister: {
+          label: `Parents + Sister (${extractM2FromText(parPart, 39)} m² 7F Supreme Twin)`,
+          areaM2: extractM2FromText(parPart, 39),
+          suitcases: 3,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Wide Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Wide Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Huge 39 m² room, though Sister uses a ~100 cm extra bed (between SG Single & Super Single).',
+        },
+      };
+    }
+
+    // ---- STOP 3: NOBORIBETSU ----
+    if (stop.id === 3) {
+      if (/takinoya\s*bekkan|tamanoyu/i.test(hay)) {
+        return {
+          isSolo: false,
+          brothers: {
+            label: 'Brothers’ Room (~40 m² Two-Room Jap-West)',
+            areaM2: extractM2FromText(broPart, 40),
+            suitcases: 2,
+            beds: [
+              { widthCm: 120, sleepers: 1, occupant: 'Bro 1', type: 'Semi-Double' },
+              { widthCm: 120, sleepers: 1, occupant: 'Bro 2', type: 'Semi-Double' },
+            ],
+            note: 'Two roomy 120 cm semi-double beds plus an adjoining tatami sitting room.',
+          },
+          parentsSister: {
+            label: 'Parents + Sister (~40 m² Two-Room Jap-West)',
+            areaM2: extractM2FromText(parPart, 40),
+            suitcases: 3,
+            beds: [
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Semi-Double' },
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Semi-Double' },
+              { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Tatami Futon', isSister: true, isFuton: true },
+            ],
+            note: 'Two-room layout means Sister’s plush ~100 cm tatami futon sits in its own separate tatami area for extra privacy.',
+          },
+        };
+      }
+      // Takinoya 5-star
+      return {
+        isSolo: false,
+        brothers: {
+          label: 'Brothers’ Room (65 m² Type AW Suite)',
+          areaM2: extractM2FromText(broPart, 65),
+          suitcases: 2,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Bro 1', type: 'Low Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Bro 2', type: 'Low Twin' },
+          ],
+          note: 'Massive 65 m² luxury ryokan suite — effortless luggage & lounge space.',
+        },
+        parentsSister: {
+          label: 'Parents + Sister (83 m² Type D w/ Private Bath)',
+          areaM2: extractM2FromText(parPart, 83),
+          suitcases: 3,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Low Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Low Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Plush Tatami Futon', isSister: true, isFuton: true },
+          ],
+          note: 'Huge 83 m² sanctuary with separate tatami zone for Sister’s thick Japanese futon (~100 cm).',
+        },
+      };
+    }
+
+    // ---- STOP 4: LAKE TOYA (NONOKAZE) ----
+    if (stop.id === 4) {
+      const isSpa = /spa|36\.8/i.test(hay);
+      return {
+        isSolo: false,
+        brothers: {
+          label: isSpa ? 'Brothers’ Room (36.8 m² Spa 7F Twin)' : 'Brothers’ Room (56 m² Club Deluxe Twin)',
+          areaM2: isSpa ? 36.8 : 56,
+          suitcases: 2,
+          beds: [
+            { widthCm: isSpa ? 115 : 120, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+            { widthCm: isSpa ? 115 : 120, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+          ],
+          note: isSpa
+            ? 'Still a very roomy 36.8 m² lakefront room with two full twin beds.'
+            : 'Expansive 56 m² renovated lakefront lounge layout with two wide 120 cm twins.',
+        },
+        parentsSister: {
+          label: 'Parents + Sister (56 m² Club Jap-West)',
+          areaM2: 56,
+          suitcases: 3,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Wide Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Wide Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Tatami Futon', isSister: true, isFuton: true },
+          ],
+          note: 'Separate raised tatami area gives Sister her own cozy zone on a ~100 cm futon overlooking Lake Toya.',
+        },
+      };
+    }
+
+    // ---- STOP 5: HAKODATE (TOKYU STAY) ----
+    if (stop.id === 5) {
+      const bros = {
+        label: `Brothers’ Room (${extractM2FromText(broPart, 19)} m² Standard Twin)`,
+        areaM2: extractM2FromText(broPart, 19),
+        suitcases: 2,
+        beds: [
+          { widthCm: 100, sleepers: 1, occupant: 'Bro 1', type: 'Compact Twin' },
+          { widthCm: 100, sleepers: 1, occupant: 'Bro 2', type: 'Compact Twin' },
+        ],
+        note: 'Two 100 cm compact twin beds (slightly narrower than SG Super Single) + in-room washer-dryer.',
+      };
+      if (solo) {
+        return {
+          isSolo: true,
+          brothers: bros,
+          sisterSolo: {
+            label: `Sister’s Solo Room (${extractM2FromText(sisPart, 16)} m² Comfort Double)`,
+            areaM2: extractM2FromText(sisPart, 16),
+            suitcases: 1,
+            beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed' }],
+            note: 'Sister gets a private 140 cm double bed + her own washer-dryer for 3 nights in Hakodate.',
+          },
+          parents: {
+            label: 'Parents’ Room (21 m² Twin)',
+            areaM2: 21,
+            suitcases: 2,
+            beds: [
+              { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+              { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            ],
+            note: 'Two proper twin beds with zero extra bed crowding.',
+          },
+        };
+      }
+      return {
+        isSolo: false,
+        brothers: bros,
+        parentsSister: {
+          label: `Parents + Sister (${extractM2FromText(parPart, 33)} m² Corner Twin)`,
+          areaM2: extractM2FromText(parPart, 33),
+          suitcases: 3,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            { widthCm: 97, sleepers: 1, occupant: 'Sister', type: 'Sofa / Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Spacious 33 m² corner room, with Sister on a ~97 cm sofa/extra bed for 3 nights.',
+        },
+      };
+    }
+
+    // ---- STOP 6: SAPPORO (THE GATE HOTEL) ----
+    if (stop.id === 6) {
+      return {
+        isSolo: false,
+        brothers: {
+          label: `Brothers’ Room (${extractM2FromText(broPart, 26)} m² Essential Twin)`,
+          areaM2: extractM2FromText(broPart, 26),
+          suitcases: 2,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Bro 1', type: 'Slumberland Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Bro 2', type: 'Slumberland Twin' },
+          ],
+          note: 'Brand-new Dec 2025 rooms with plush 120 cm Slumberland mattresses and comfortable packing space.',
+        },
+        parentsSister: {
+          label: `Parents + Sister (${extractM2FromText(parPart, 31)} m² Scenic Hollywood Triple)`,
+          areaM2: extractM2FromText(parPart, 31),
+          suitcases: 3,
+          beds: [
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Slumberland Twin' },
+            { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Slumberland Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Parents get 120 cm Slumberland beds; Sister sleeps on a ~100 cm extra bed (~SG Super Single width).',
+        },
+      };
+    }
+
+    // ---- STOP 7: TOKYO (SUPPORTS GINZA/HIBIYA/KYOBASHI + UENO/ASAKUSA) ----
+    const isDoubleBros = stop.hasStopConfigurator
+      ? state.stop7Beds === 'double'
+      : /double|queen/i.test(broPart) && !/twin/i.test(broPart);
+
+    // 7A Ginza: Hotel Gracery Ginza
+    if (/gracery/i.test(hay)) {
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 18 : 24);
+      const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 110);
+      return {
+        isSolo: false,
+        brothers: {
+          label: isDoubleBros
+            ? `Brothers’ Room (${broArea} m² Standard Double)`
+            : `Brothers’ Room (${broArea} m² Standard Twin)`,
+          areaM2: broArea,
+          suitcases: 2,
+          beds: isDoubleBros
+            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Double' }]
+            : [
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+              ],
+          note: isDoubleBros
+            ? '140 cm bed is 12 cm narrower than an SG Queen — noticeable shoulder-to-shoulder fit for 2 adults.'
+            : 'Proper 110 cm twin beds (~SG Super Single each) with solid central-Ginza floor space.',
+        },
+        parentsSister: {
+          label: `Parents + Sister (${extractM2FromText(parPart, 25)} m² Triple)`,
+          areaM2: extractM2FromText(parPart, 25),
+          suitcases: 3,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            { widthCm: 95, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Standard Tokyo triple: Sister sleeps on a ~95 cm extra bed (≈ SG Single) and 3 suitcases will feel snug.',
+        },
+      };
+    }
+
+    // 7B Ginza / Legacy 7B Okachimachi: Super Hotel
+    if (/super\s*hotel/i.test(hay)) {
+      const isConnecting = /connect/i.test(hay);
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 12 : 18);
+      const broW = extractCmFromText(broPart, isDoubleBros ? 150 : 100);
+      const brosObj = {
+        label: isDoubleBros
+          ? `Brothers’ Room (${broArea} m² Double)`
+          : `Brothers’ Room (${broArea} m² Twin)`,
+        areaM2: broArea,
+        suitcases: 2,
+        beds: isDoubleBros
+          ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Wide Double' }]
+          : [
+              { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Compact Twin' },
+              { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Compact Twin' },
+            ],
+        note: isDoubleBros
+          ? `Super Hotel’s ${broW} cm bed is close to an SG Queen, but the ${broArea} m² floor is very tight for 2 open suitcases.`
+          : 'Two separate beds avoid sharing, though floor space stays compact for packing.',
+      };
+
+      if (isConnecting || solo) {
+        const connArea = extractM2FromText(parPart, 24);
+        return {
+          isSolo: true,
+          brothers: brosObj,
+          sisterSolo: {
+            label: `Sister’s Adjoining Room (~${Math.round(connArea / 2)} m² inside ${connArea} m² Connecting)`,
+            areaM2: Math.round(connArea / 2),
+            suitcases: 1,
+            beds: [{ widthCm: 150, sleepers: 1, occupant: 'Sister', type: 'Wide Bed (Own Room)' }],
+            note: 'Internal connecting door gives Sister her own separate bedroom, bathroom, and ~150 cm bed (≈ SG Queen solo!).',
+          },
+          parents: {
+            label: `Parents’ Adjoining Room (~${Math.round(connArea / 2)} m² inside Connecting)`,
+            areaM2: Math.round(connArea / 2),
+            suitcases: 2,
+            beds: [{ widthCm: 150, sleepers: 2, occupant: 'Parents', type: 'Wide Double (≈ SG Queen)' }],
+            note: 'Parents share one ~150 cm wide bed (≈ SG Queen) with an internal door directly to Sister’s room.',
+          },
+        };
+      }
+
+      return {
+        isSolo: false,
+        brothers: brosObj,
+        parentsSister: {
+          label: `Parents + Sister (${extractM2FromText(parPart, 24)} m² Triple / Loft-Free Setup)`,
+          areaM2: extractM2FromText(parPart, 24),
+          suitcases: 3,
+          beds: [
+            { widthCm: 150, sleepers: 2, occupant: 'Parents', type: 'Wide Double' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Single / Extra Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Parents share a ~150 cm bed while Sister gets a ~100 cm single/extra bed.',
+        },
+      };
+    }
+
+    // 7C Ginza: Sotetsu Fresa Inn (2+2+1 Only)
+    if (/sotetsu|fresa/i.test(hay)) {
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 13 : 17);
+      const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 100);
+      const sisArea = extractM2FromText(sisPart, 12.5);
+      return {
+        isSolo: true,
+        brothers: {
+          label: isDoubleBros
+            ? `Brothers’ Room (${broArea} m² Double)`
+            : `Brothers’ Room (${broArea} m² Twin)`,
+          areaM2: broArea,
+          suitcases: 2,
+          beds: isDoubleBros
+            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Double' }]
+            : [
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Compact Twin' },
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Compact Twin' },
+              ],
+          note: isDoubleBros
+            ? 'Very compact Tokyo room (13 m²) + 140 cm bed (12 cm < SG Queen) — open 1 suitcase at a time.'
+            : 'Two 100 cm beds keep Brothers separate, though 17 m² stays snug for 2 big luggage bags.',
+        },
+        sisterSolo: {
+          label: `Sister’s Solo Room (${sisArea} m² Double/Single)`,
+          areaM2: sisArea,
+          suitcases: 1,
+          beds: [{ widthCm: extractCmFromText(sisPart, 140), sleepers: 1, occupant: 'Sister', type: 'Double Bed (Solo)' }],
+          note: 'Sister gets a full 140 cm double bed & private bathroom to herself (no extra bed!) — compact floor is totally fine for 1 suitcase.',
+        },
+        parents: {
+          label: 'Parents’ Room (~17 m² Twin)',
+          areaM2: 17,
+          suitcases: 2,
+          beds: [
+            { widthCm: 100, sleepers: 1, occupant: 'Parent 1', type: 'Compact Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Parent 2', type: 'Compact Twin' },
+          ],
+          note: 'Clean 2-bed room with no 3rd extra bed crowding the floor.',
+        },
+      };
+    }
+
+    // 7D / 7E: remm Tokyo Kyobashi & remm Hibiya (2+2+1 Only)
+    if (/remm/i.test(hay)) {
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 14.4 : 24.4);
+      const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 110);
+      const sisArea = extractM2FromText(sisPart, 14.4);
+      const sisW = extractCmFromText(sisPart, 140);
+      return {
+        isSolo: true,
+        brothers: {
+          label: isDoubleBros
+            ? `Brothers’ Room (${broArea} m² Semi-Double)`
+            : `Brothers’ Room (${broArea} m² Twin)`,
+          areaM2: broArea,
+          suitcases: 2,
+          beds: isDoubleBros
+            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Double' }]
+            : [
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+              ],
+          note: isDoubleBros
+            ? '14.4 m² floor + 140 cm bed (12 cm narrower than SG Queen) — tight for 2 brothers + 2 suitcases.'
+            : 'Excellent ~24 m² Tokyo twin room with two 110 cm Silky remm beds and an in-room massage chair.',
+        },
+        sisterSolo: {
+          label: `Sister’s Solo Room (${sisArea} m² Semi-Double)`,
+          areaM2: sisArea,
+          suitcases: 1,
+          beds: [{ widthCm: sisW, sleepers: 1, occupant: 'Sister', type: 'Silky remm Double' }],
+          note: 'Sister gets a plush 140 cm Silky remm double bed, private bathroom & massage chair all to herself!',
+        },
+        parents: {
+          label: 'Parents’ Room (~24 m² Twin)',
+          areaM2: 24,
+          suitcases: 2,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+          ],
+          note: 'Generous ~24 m² Twin with zero extra beds and easy luggage clearance.',
+        },
+      };
+    }
+
+    // Legacy 7A: Mitsui Garden Hotel Ueno
+    if (/mitsui\s*garden/i.test(hay)) {
+      return {
+        isSolo: false,
+        brothers: {
+          label: 'Brothers’ Room (22 m² Standard Twin)',
+          areaM2: extractM2FromText(broPart, 22),
+          suitcases: 2,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+          ],
+          note: 'Two proper 110 cm twin beds (~SG Super Single each) with modern 2023 renovation.',
+        },
+        parentsSister: {
+          label: 'Parents + Sister (25 m² Superior Twin + Sofa Bed)',
+          areaM2: extractM2FromText(parPart, 25),
+          suitcases: 3,
+          beds: [
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+            { widthCm: 95, sleepers: 1, occupant: 'Sister', type: 'Sofa Bed', isSister: true, isExtra: true },
+          ],
+          note: 'Sister sleeps on a ~95 cm convertible sofa bed (≈ SG Single) for 3 nights in Tokyo.',
+        },
+      };
+    }
+
+    // Legacy 7C: Dormy Inn EXPRESS Asakusa
+    if (/dormy\s*inn/i.test(hay)) {
+      return {
+        isSolo: false,
+        brothers: {
+          label: 'Brothers’ Room (20 m² Shared Queen)',
+          areaM2: extractM2FromText(broPart, 20),
+          suitcases: 2,
+          beds: [{ widthCm: 160, sleepers: 2, occupant: '2 Brothers', type: 'Shared Queen' }],
+          note: '160 cm Queen bed is 8 cm wider than a Singapore Queen — much roomier than a 140 cm Japanese double.',
+        },
+        parentsSister: {
+          label: 'Parents + Sister (27 m² Jap-West River View)',
+          areaM2: extractM2FromText(parPart, 27),
+          suitcases: 3,
+          beds: [
+            { widthCm: 100, sleepers: 1, occupant: 'Parent 1', type: 'Compact Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Parent 2', type: 'Compact Twin' },
+            { widthCm: 100, sleepers: 1, occupant: 'Sister', type: 'Tatami Futon', isSister: true, isFuton: true },
+          ],
+          note: 'Japanese-Western layout lets Sister sleep on a ~100 cm tatami futon instead of a folding rollaway.',
+        },
+      };
+    }
+
+    // Generic safe fallback
+    const broArea = extractM2FromText(broPart, isDoubleBros ? 16 : 22);
+    return {
+      isSolo: solo,
+      brothers: {
+        label: `Brothers’ Room (${broArea} m²)`,
+        areaM2: broArea,
+        suitcases: 2,
+        beds: isDoubleBros
+          ? [{ widthCm: 140, sleepers: 2, occupant: '2 Brothers', type: 'Shared Double' }]
+          : [
+              { widthCm: 110, sleepers: 1, occupant: 'Bro 1', type: 'Twin Bed' },
+              { widthCm: 110, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
+            ],
+        note: isDoubleBros ? 'Shared 140 cm double bed (12 cm narrower than SG Queen).' : 'Two separate ~110 cm twin beds.',
+      },
+      ...(solo
+        ? {
+            sisterSolo: {
+              label: `Sister’s Solo Room (${extractM2FromText(sisPart, 15)} m²)`,
+              areaM2: extractM2FromText(sisPart, 15),
+              suitcases: 1,
+              beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed (Solo)' }],
+              note: 'Private solo room with a 140 cm double bed.',
+            },
+            parents: {
+              label: 'Parents’ Room (20 m² Twin)',
+              areaM2: 20,
+              suitcases: 2,
+              beds: [
+                { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+                { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+              ],
+              note: 'Two separate twin beds with zero extra beds.',
+            },
+          }
+        : {
+            parentsSister: {
+              label: `Parents + Sister (${extractM2FromText(parPart, 28)} m² Triple)`,
+              areaM2: extractM2FromText(parPart, 28),
+              suitcases: 3,
+              beds: [
+                { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
+                { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
+                { widthCm: 97, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+              ],
+              note: 'Parents take the two twin beds; Sister uses a ~97 cm extra bed.',
+            },
+          }),
+    };
+  }
+
+  /**
+   * Renders a clean, top-down proportional SVG of a room's beds with adult shoulder silhouettes (~48 cm each).
+   * Scale: 1 cm = 0.85 px so a 140 cm bed and 2× 110 cm beds are directly comparable at a glance.
+   */
+  function renderBedGroupSvg(beds, options = {}) {
+    const scale = options.compact ? 0.62 : 0.78;
+    const bedH = options.compact ? 64 : 86;
+    const gap = options.joined ? 2 : (options.compact ? 10 : 14);
+    const padX = 12;
+    const padY = 10;
+    const labelH = options.compact ? 18 : 22;
+
+    const totalBedW = beds.reduce((sum, b) => sum + b.widthCm * scale, 0) + gap * Math.max(0, beds.length - 1);
+    const svgW = Math.max(options.compact ? 175 : 230, totalBedW + padX * 2);
+    const svgH = padY + bedH + labelH + 6;
+    let curX = (svgW - totalBedW) / 2;
+
+    const bedsSvg = beds.map((bed) => {
+      const bw = bed.widthCm * scale;
+      const x = curX;
+      curX += bw + gap;
+
+      const isSister = Boolean(bed.isSister || bed.occupant === 'Sister');
+      const isTightShared = bed.sleepers >= 2 && bed.widthCm <= 145;
+      const stroke = isSister ? '#6B4E71' : isTightShared ? '#9A6324' : '#2E5A47';
+      const fill = isSister ? '#F6F1F7' : isTightShared ? '#FBF5EC' : '#EDF4F0';
+      const pillowFill = '#FFFFFF';
+      const sleeperFill = isSister ? '#6B4E71' : isTightShared ? '#9A6324' : '#2E5A47';
+
+      // Pillows
+      const pillowCount = bed.sleepers >= 2 ? 2 : 1;
+      const pillowGap = 4;
+      const pillowW = Math.min(bw - 10, (bw - 10 - pillowGap * (pillowCount - 1)) / pillowCount);
+      const pillowH = options.compact ? 10 : 13;
+      const pillowStartX = x + (bw - (pillowW * pillowCount + pillowGap * (pillowCount - 1))) / 2;
+      let pillowsHtml = '';
+      for (let i = 0; i < pillowCount; i++) {
+        const px = pillowStartX + i * (pillowW + pillowGap);
+        pillowsHtml += `<rect x="${px.toFixed(1)}" y="${(padY + 5).toFixed(1)}" width="${pillowW.toFixed(1)}" height="${pillowH}" rx="3.5" fill="${pillowFill}" stroke="${stroke}" stroke-width="1" opacity="0.95" />`;
+      }
+
+      // Adult sleeper silhouettes (~48 cm shoulder width drawn to exact mattress scale!)
+      const shoulderW = 48 * scale;
+      const headR = options.compact ? 4.5 : 5.8;
+      let sleepersHtml = '';
+      for (let i = 0; i < bed.sleepers; i++) {
+        const cx = bed.sleepers === 1
+          ? x + bw / 2
+          : x + (bw / 2) + (i === 0 ? -bw * 0.23 : bw * 0.23);
+        const headY = padY + pillowH + (options.compact ? 12 : 16);
+        const bodyY = headY + headR + 2;
+        const bodyH = options.compact ? 22 : 30;
+        const clampedSW = Math.min(shoulderW, (bw / bed.sleepers) - 4);
+        sleepersHtml += `
+          <circle cx="${cx.toFixed(1)}" cy="${headY.toFixed(1)}" r="${headR}" fill="${sleeperFill}" opacity="0.28" />
+          <rect x="${(cx - clampedSW / 2).toFixed(1)}" y="${bodyY.toFixed(1)}" width="${clampedSW.toFixed(1)}" height="${bodyH}" rx="${(clampedSW / 2.6).toFixed(1)}" fill="${sleeperFill}" opacity="0.22" />
+        `;
+      }
+
+      // Extra / futon dashed border hint
+      const dashAttr = bed.isExtra ? 'stroke-dasharray="4 3"' : '';
+      const footText = `${bed.widthCm} cm`;
+      const occText = options.compact ? '' : (bed.occupant || '');
+
+      return `
+        <g>
+          <rect x="${x.toFixed(1)}" y="${padY}" width="${bw.toFixed(1)}" height="${bedH}" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="1.6" ${dashAttr} />
+          <line x1="${(x + 3).toFixed(1)}" y1="${(padY + bedH * 0.44).toFixed(1)}" x2="${(x + bw - 3).toFixed(1)}" y2="${(padY + bedH * 0.44).toFixed(1)}" stroke="${stroke}" stroke-width="0.9" opacity="0.25" />
+          ${pillowsHtml}
+          ${sleepersHtml}
+          <text x="${(x + bw / 2).toFixed(1)}" y="${(padY + bedH + 13).toFixed(1)}" text-anchor="middle" fill="${stroke}" font-family="Inter, sans-serif" font-size="${options.compact ? '9.5' : '10.5'}" font-weight="700">${footText}</text>
+          ${occText ? `<text x="${(x + bw / 2).toFixed(1)}" y="${(padY + bedH + 24).toFixed(1)}" text-anchor="middle" fill="#575B57" font-family="Inter, sans-serif" font-size="9" font-weight="500">${escapeHtml(occText)}</text>` : ''}
+        </g>
+      `;
+    }).join('');
+
+    return `
+      <svg viewBox="0 0 ${svgW.toFixed(0)} ${(svgH + (options.compact ? 0 : 8)).toFixed(0)}" class="w-full max-w-[340px] h-auto mx-auto select-none" role="img" aria-label="Proportional top-down bed size diagram">
+        ${bedsSvg}
+      </svg>
+    `;
+  }
+
+  /**
+   * Renders a true-to-scale top-down SVG room footprint with bathroom zone, beds,
+   * and open 28-inch suitcases (75 x 100 cm open clamshell each).
+   */
+  function renderRoomFootprintSvg(room, accent = 'pine') {
+    const area = Math.max(11, Number(room.areaM2) || 18);
+    // Realistic hotel room proportions (~1 : 1.45 width-to-depth)
+    const roomW_m = Math.sqrt(area / 1.42);
+    const roomH_m = area / roomW_m;
+
+    // Shared visual scale capped so huge 83 m² ryokan fits cleanly while Tokyo 12–25 m² stays true-to-scale against each other
+    const maxScalePxPerM = 34;
+    const svgW = 300;
+    const svgH = 195;
+    const pad = 20;
+    const pxPerM = Math.min(maxScalePxPerM, (svgW - pad * 2) / roomW_m, (svgH - pad * 2) / roomH_m);
+
+    const rw = roomW_m * pxPerM;
+    const rh = roomH_m * pxPerM;
+    const ox = (svgW - rw) / 2;
+    const oy = (svgH - rh) / 2;
+
+    const stroke = accent === 'plum' ? '#6B4E71' : accent === 'amber' ? '#9A6324' : '#2E5A47';
+    const bedFill = accent === 'plum' ? '#F6F1F7' : accent === 'amber' ? '#FBF5EC' : '#EDF4F0';
+
+    // Bathroom / entryway block (~3.4 m² for compact rooms, up to ~7 m² for suites)
+    const bathW = Math.min(rw * 0.42, (area < 20 ? 1.55 : area < 35 ? 1.85 : 2.3) * pxPerM);
+    const bathH = Math.min(rh * 0.34, (area < 20 ? 2.0 : 2.3) * pxPerM);
+
+    // Draw beds along top/right wall (length 2.0 m)
+    const bedLenPx = Math.min(rh - bathH - 8, 2.0 * pxPerM);
+    const bedGap = 4;
+    const bedWidthsPx = room.beds.map((b) => (b.widthCm / 100) * pxPerM);
+    const totalBedsW = bedWidthsPx.reduce((a, b) => a + b, 0) + bedGap * Math.max(0, room.beds.length - 1);
+    const bedsScaleFit = totalBedsW > rw - 10 ? (rw - 10) / totalBedsW : 1;
+
+    let bx = ox + rw - 6 - totalBedsW * bedsScaleFit;
+    const by = oy + 6;
+    const bedsHtml = room.beds.map((b, i) => {
+      const bw = bedWidthsPx[i] * bedsScaleFit;
+      const x = bx;
+      bx += bw + bedGap * bedsScaleFit;
+      const isSis = Boolean(b.isSister || b.occupant === 'Sister');
+      const bStroke = isSis ? '#6B4E71' : stroke;
+      const bFill = isSis ? '#F6F1F7' : bedFill;
+      return `
+        <rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bedLenPx.toFixed(1)}" rx="3.5" fill="${bFill}" stroke="${bStroke}" stroke-width="1.3" ${b.isExtra ? 'stroke-dasharray="3 2"' : ''} />
+      `;
+    }).join('');
+
+    // Draw open 28" suitcases (0.75 m × 1.00 m open clamshell) in remaining floor area
+    const suitW = 0.75 * pxPerM;
+    const suitH = 1.0 * pxPerM;
+    const numSuitcases = room.suitcases || 2;
+    const floorStartX = ox + bathW + 6;
+    const floorStartY = oy + rh - suitH - 6;
+    let suitcasesHtml = '';
+    for (let i = 0; i < numSuitcases; i++) {
+      const sx = floorStartX + i * (suitW + 4);
+      const sy = sx + suitW <= ox + rw - 4 ? floorStartY : oy + bathH + 6;
+      const clampedX = Math.min(sx, ox + rw - suitW - 4);
+      suitcasesHtml += `
+        <g opacity="0.92">
+          <rect x="${clampedX.toFixed(1)}" y="${sy.toFixed(1)}" width="${suitW.toFixed(1)}" height="${suitH.toFixed(1)}" rx="2" fill="#9E4A35" fill-opacity="0.16" stroke="#9E4A35" stroke-width="1.1" />
+          <line x1="${clampedX.toFixed(1)}" y1="${(sy + suitH / 2).toFixed(1)}" x2="${(clampedX + suitW).toFixed(1)}" y2="${(sy + suitH / 2).toFixed(1)}" stroke="#9E4A35" stroke-width="0.9" stroke-dasharray="2 1.5" />
+        </g>
+      `;
+    }
+
+    // Luggage clearance verdict
+    const usablePerBag = (area - 3.6 - room.beds.reduce((s, b) => s + (b.widthCm / 100) * 2.0, 0)) / Math.max(1, numSuitcases);
+    let clearance = { label: 'Spacious packing', cls: 'bg-pine-light text-pine border-pine-border' };
+    if (usablePerBag < 2.2) {
+      clearance = { label: 'Tight · 1 suitcase open at a time', cls: 'bg-amberWarm-light text-amberWarm border-amberWarm-border' };
+    } else if (usablePerBag < 4.5) {
+      clearance = { label: 'Manageable · snug with open bags', cls: 'bg-sand text-inkSoft border-stoneLine' };
+    } else if (usablePerBag < 9) {
+      clearance = { label: 'Comfortable floor clearance', cls: 'bg-pine-light text-pine border-pine-border' };
+    }
+
+    return {
+      clearance,
+      svg: `
+        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto select-none" role="img" aria-label="Scale floorplan of ${escapeHtml(room.label)}">
+          <rect x="0" y="0" width="${svgW}" height="${svgH}" rx="12" fill="#FAF8F4" />
+          <!-- Room outer walls -->
+          <rect x="${ox.toFixed(1)}" y="${oy.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" rx="4" fill="#FFFFFF" stroke="#1E211F" stroke-width="1.8" />
+          <!-- Bath / Entry zone -->
+          <rect x="${ox.toFixed(1)}" y="${(oy + rh - bathH).toFixed(1)}" width="${bathW.toFixed(1)}" height="${bathH.toFixed(1)}" fill="#F2EFE9" stroke="#D7D1C4" stroke-width="1" />
+          <text x="${(ox + bathW / 2).toFixed(1)}" y="${(oy + rh - bathH / 2 + 3).toFixed(1)}" text-anchor="middle" fill="#838781" font-family="Inter, sans-serif" font-size="8" font-weight="600">Bath</text>
+          ${bedsHtml}
+          ${suitcasesHtml}
+          <!-- Dimensions label -->
+          <text x="${(ox + rw / 2).toFixed(1)}" y="${(oy - 5).toFixed(1)}" text-anchor="middle" fill="#575B57" font-family="Inter, sans-serif" font-size="9.5" font-weight="600">${area} m² (~${roomW_m.toFixed(1)}m × ${roomH_m.toFixed(1)}m)</text>
+        </svg>
+      `,
+    };
+  }
+
+  // ===================================================================
+  // BED & ROOM SIZE GUIDE MODAL (DYNAMICALLY INJECTED — NO HTML EDITS)
+  // ===================================================================
+  function ensureBedGuideUI() {
+    // 1. Inject Hero Quick Action button next to "Explore Google Maps" & "Load Shared Picks"
+    const mapJumpBtn = document.getElementById('hero-map-jump-btn');
+    if (mapJumpBtn && mapJumpBtn.parentElement && !document.getElementById('open-bed-guide-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'open-bed-guide-btn';
+      btn.className = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium bg-white hover:bg-sand text-ink border border-stoneLine transition-colors cursor-pointer whitespace-nowrap';
+      btn.innerHTML = '<span aria-hidden="true">📏</span><span>Bed &amp; Room Guide</span>';
+      btn.addEventListener('click', () => openBedGuideModal(7));
+      mapJumpBtn.insertAdjacentElement('afterend', btn);
+    }
+
+    // 2. Inject quick launch button inside Desktop Right Rail beside Map Explorer
+    const railMapBtn = document.getElementById('rail-open-map-btn');
+    if (railMapBtn && railMapBtn.parentElement && !document.getElementById('rail-open-bed-guide-btn')) {
+      const wrap = railMapBtn.parentElement;
+      const bedBtn = document.createElement('button');
+      bedBtn.type = 'button';
+      bedBtn.id = 'rail-open-bed-guide-btn';
+      bedBtn.className = 'mt-2 w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-plum-light/60 border border-stoneLine hover:border-plum-border transition-colors cursor-pointer group';
+      bedBtn.innerHTML = `
+        <span class="inline-flex items-center gap-2 text-xs font-medium text-ink">
+          <span aria-hidden="true">📏</span>
+          <span>Bed &amp; Room Size Guide</span>
+        </span>
+        <span class="text-[11px] font-medium text-plum group-hover:translate-x-0.5 transition-transform">SG Scale →</span>
+      `;
+      bedBtn.addEventListener('click', () => openBedGuideModal(7));
+      wrap.appendChild(bedBtn);
+    }
+
+    // 3. Inject Modal Shell into document.body
+    if (!document.getElementById('bed-guide-modal')) {
+      const modal = document.createElement('div');
+      modal.id = 'bed-guide-modal';
+      modal.className = 'hidden fixed inset-0 z-50 bg-ink/55 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 lg:p-6';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-labelledby', 'bed-guide-modal-title');
+      modal.innerHTML = `
+        <div class="bg-paper border border-stoneLine rounded-2xl w-full max-w-5xl max-h-[92vh] shadow-2xl overflow-hidden flex flex-col">
+          <!-- Modal Header -->
+          <div class="px-4 sm:px-6 py-3.5 bg-sand/80 border-b border-stoneLine flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <div>
+              <div class="text-[10px] uppercase tracking-[0.14em] font-semibold text-maple">Singapore Mattress &amp; Luggage Reference</div>
+              <h3 id="bed-guide-modal-title" class="font-serif text-lg sm:text-2xl font-medium text-ink leading-tight">Bed &amp; Room Size Guide</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="inline-flex p-0.5 rounded-xl bg-white border border-stoneLine" role="tablist" aria-label="Bed guide views">
+                <button type="button" data-bg-tab="beds" class="bg-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-ink text-paper transition-colors cursor-pointer whitespace-nowrap">Bed Widths (SG Scale)</button>
+                <button type="button" data-bg-tab="rooms" class="bg-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-inkSoft hover:text-ink transition-colors cursor-pointer whitespace-nowrap">Room &amp; Suitcases (m²)</button>
+              </div>
+              <button type="button" id="close-bed-guide-modal" class="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-stoneLine text-inkSoft hover:text-ink flex items-center justify-center cursor-pointer transition-colors" aria-label="Close bed guide">✕</button>
+            </div>
+          </div>
+
+          <!-- Stop & Option Selector Strip -->
+          <div id="bed-guide-controls" class="px-4 sm:px-6 py-3 bg-white border-b border-stoneLine space-y-2.5 shrink-0"></div>
+
+          <!-- Scrollable Content Body -->
+          <div id="bed-guide-body" class="flex-1 overflow-y-auto rail-scroll p-4 sm:p-6 space-y-5"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeBedGuideModal();
+      });
+      document.getElementById('close-bed-guide-modal').addEventListener('click', closeBedGuideModal);
+      modal.querySelectorAll('.bg-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.bedGuideTab = btn.dataset.bgTab;
+          renderBedGuideModal();
+        });
+      });
+    }
+  }
+
+  function openBedGuideModal(stopId = 7, optId = null, tab = null) {
+    ensureBedGuideUI();
+    state.bedGuideStopId = stopId || 7;
+    state.bedGuideOptId = optId;
+    if (tab) state.bedGuideTab = tab;
+    state.bedGuideOpen = true;
+    document.getElementById('bed-guide-modal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    renderBedGuideModal();
+  }
+
+  function closeBedGuideModal() {
+    const modal = document.getElementById('bed-guide-modal');
+    if (modal) modal.classList.add('hidden');
+    state.bedGuideOpen = false;
+    if (!state.mapModalOpen) document.body.classList.remove('overflow-hidden');
+  }
+
+  function renderBedReferenceLadderSvg(highlightWidths) {
+    const W = 720;
+    const rowH = 34;
+    const padL = 175;
+    const padR = 54;
+    const padT = 34;
+    const padB = 26;
+    const maxCm = 195;
+    const plotW = W - padL - padR;
+    const H = padT + BED_LADDER_TIERS.length * rowH + padB;
+    const cmToX = (cm) => padL + (cm / maxCm) * plotW;
+
+    // SG dashed reference verticals
+    const refLines = SG_MATTRESS_REFS.map((ref) => {
+      const x = cmToX(ref.cm);
+      return `
+        <g>
+          <line x1="${x.toFixed(1)}" y1="${padT - 8}" x2="${x.toFixed(1)}" y2="${H - padB + 4}" stroke="#9E4A35" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.55" />
+          <text x="${x.toFixed(1)}" y="${padT - 14}" text-anchor="middle" fill="#9E4A35" font-family="Inter, sans-serif" font-size="9" font-weight="700">${ref.shortLabel}</text>
+          <text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#838781" font-family="Inter, sans-serif" font-size="8.5" font-weight="600">${ref.cm} cm</text>
+        </g>
+      `;
+    }).join('');
+
+    const rows = BED_LADDER_TIERS.map((tier, idx) => {
+      const y = padT + idx * rowH;
+      const barW = (tier.cm / maxCm) * plotW;
+
+      // Determine if Sister, Parents, or Brothers use a bed near this tier width
+      const tags = [];
+      if (highlightWidths.sister.some((w) => Math.abs(w - tier.cm) <= 5)) tags.push({ txt: 'Sister', fill: '#6B4E71' });
+      if (highlightWidths.brothers.some((w) => Math.abs(w - tier.cm) <= 5)) tags.push({ txt: 'Bros', fill: '#2E5A47' });
+      if (highlightWidths.parents.some((w) => Math.abs(w - tier.cm) <= 5)) tags.push({ txt: 'Parents', fill: '#575B57' });
+
+      const active = tags.length > 0;
+      const barFill = tags.some((t) => t.txt === 'Sister')
+        ? '#6B4E71'
+        : tags.some((t) => t.txt === 'Bros')
+          ? '#2E5A47'
+          : active
+            ? '#575B57'
+            : '#D7D1C4';
+
+      let badgeX = padL + barW + 8;
+      const tagsSvg = tags.map((t) => {
+        const tw = t.txt.length * 5.8 + 12;
+        const bx = badgeX;
+        badgeX += tw + 4;
+        return `
+          <rect x="${bx.toFixed(1)}" y="${(y + 6).toFixed(1)}" width="${tw.toFixed(1)}" height="16" rx="8" fill="${t.fill}" />
+          <text x="${(bx + tw / 2).toFixed(1)}" y="${(y + 17).toFixed(1)}" text-anchor="middle" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="8.5" font-weight="700">${t.txt}</text>
+        `;
+      }).join('');
+
+      return `
+        <g>
+          <text x="${padL - 10}" y="${(y + 17).toFixed(1)}" text-anchor="end" fill="${active ? '#1E211F' : '#575B57'}" font-family="Inter, sans-serif" font-size="10.5" font-weight="${active ? '700' : '500'}">${escapeHtml(tier.label)}</text>
+          <rect x="${padL}" y="${(y + 5).toFixed(1)}" width="${barW.toFixed(1)}" height="18" rx="5" fill="${barFill}" opacity="${active ? '0.9' : '0.45'}" />
+          <text x="${(padL + barW - 6).toFixed(1)}" y="${(y + 17).toFixed(1)}" text-anchor="end" fill="${active ? '#FFFFFF' : '#1E211F'}" font-family="Inter, sans-serif" font-size="9.5" font-weight="700">${tier.cm} cm</text>
+          ${tagsSvg}
+        </g>
+      `;
+    }).join('');
+
+    return `
+      <svg viewBox="0 0 ${W} ${H}" class="w-full h-auto select-none" role="img" aria-label="Japanese hotel bed widths compared against Singapore mattress sizes">
+        <rect x="0" y="0" width="${W}" height="${H}" rx="12" fill="#FAF8F4" />
+        ${refLines}
+        ${rows}
+      </svg>
+    `;
+  }
+
+  function renderBedGuideModal() {
+    if (!state.bedGuideOpen || !state.dataLoaded) return;
+    const modal = document.getElementById('bed-guide-modal');
+    if (!modal) return;
+
+    // Update top tab pills
+    modal.querySelectorAll('.bg-tab-btn').forEach((btn) => {
+      const active = btn.dataset.bgTab === state.bedGuideTab;
+      btn.className = active
+        ? 'bg-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-ink text-paper transition-colors cursor-pointer whitespace-nowrap'
+        : 'bg-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-inkSoft hover:text-ink transition-colors cursor-pointer whitespace-nowrap';
+    });
+
+    const stop = STOPS.find((s) => s.id === state.bedGuideStopId) || STOPS[STOPS.length - 1];
+    const lockedNow = isStopLockedForMode(stop, state.mode);
+    const visibleOptions = lockedNow
+      ? [stop.options[0]]
+      : (stop.id === 7 ? stop.options : stop.options.filter((o) => !(state.mode === 'M2' && o.hideInMode2)));
+
+    const currentOptId = state.bedGuideOptId && visibleOptions.some((o) => o.id === state.bedGuideOptId)
+      ? state.bedGuideOptId
+      : (lockedNow ? stop.options[0].id : (state.picks[stop.id] || stop.baselineOptionId));
+    const rawOpt = getOption(stop, currentOptId);
+    const opt = resolveOptionData(stop, rawOpt);
+    const specs = getBedSpecsForOption(stop, opt, state.mode);
+    const isPickedAtStop = lockedNow || state.picks[stop.id] === opt.id;
+
+    // 1. Controls bar: Stop pills + Option pills + Stop 7 Twin/Double toggle
+    const controlsEl = document.getElementById('bed-guide-controls');
+    const stopPillsHtml = STOPS.map((s) => {
+      const active = s.id === stop.id;
+      const shortCity = s.id === 1 ? 'Haneda' : s.id === 7 ? 'Tokyo' : s.city.split(' ')[0];
+      return `
+        <button type="button" data-bg-stop="${s.id}" class="bg-stop-pill px-2.5 py-1 rounded-full text-[11px] transition-colors cursor-pointer whitespace-nowrap ${active ? 'bg-maple text-white font-semibold' : 'bg-sand text-inkSoft hover:text-ink font-medium'}">
+          ${s.id}. ${shortCity}
+        </button>
+      `;
+    }).join('');
+
+    const optPillsHtml = visibleOptions.length > 1
+      ? visibleOptions.map((o) => {
+          const active = o.id === opt.id;
+          return `
+            <button type="button" data-bg-opt="${o.id}" class="bg-opt-pill px-2.5 py-1 rounded-lg text-[11px] border transition-colors cursor-pointer whitespace-nowrap ${active ? 'bg-pine-light text-pine border-pine font-semibold' : 'bg-paper text-inkSoft border-stoneLine hover:text-ink'}">
+              ${o.id} · ${escapeHtml(o.shortName)}
+            </button>
+          `;
+        }).join('')
+      : `<span class="text-xs font-medium text-ink">${escapeHtml(opt.name)} <span class="text-inkMuted">(Locked)</span></span>`;
+
+    const tokyoBedToggleHtml = stop.id === 7 && stop.hasStopConfigurator
+      ? `
+        <div class="inline-flex items-center gap-1.5 ml-auto">
+          <span class="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-inkMuted">Bros:</span>
+          <div class="inline-flex p-0.5 rounded-lg bg-sand border border-stoneLine text-[11px]">
+            <button type="button" data-bg-s7-beds="twin" class="bg-s7-beds px-2 py-0.5 rounded-md cursor-pointer ${state.stop7Beds === 'twin' ? 'bg-pine text-white font-semibold' : 'text-inkSoft'}">Twin</button>
+            <button type="button" data-bg-s7-beds="double" class="bg-s7-beds px-2 py-0.5 rounded-md cursor-pointer ${state.stop7Beds === 'double' ? 'bg-pine text-white font-semibold' : 'text-inkSoft'}">Shared Double</button>
+          </div>
+        </div>
+      `
+      : '';
+
+    controlsEl.innerHTML = `
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-inkMuted mr-1">Stop:</span>
+        ${stopPillsHtml}
+        <span class="ml-auto px-2 py-0.5 rounded-full text-[10.5px] font-medium bg-paper text-inkSoft border border-stoneLine">${state.mode === 'M1' ? 'Mode 1 · Hybrid' : 'Mode 2 · All 3+2'}</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-inkMuted">Hotel:</span>
+        ${optPillsHtml}
+        ${tokyoBedToggleHtml}
+      </div>
+    `;
+
+    controlsEl.querySelectorAll('.bg-stop-pill').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.bedGuideStopId = Number(b.dataset.bgStop);
+        state.bedGuideOptId = null;
+        renderBedGuideModal();
+      });
+    });
+    controlsEl.querySelectorAll('.bg-opt-pill').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.bedGuideOptId = b.dataset.bgOpt;
+        renderBedGuideModal();
+      });
+    });
+    controlsEl.querySelectorAll('.bg-s7-beds').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (state.stop7Beds !== b.dataset.bgS7Beds) {
+          state.stop7Beds = b.dataset.bgS7Beds;
+          renderAll(true);
+        }
+      });
+    });
+
+    // 2. Render Body based on active tab
+    const bodyEl = document.getElementById('bed-guide-body');
+    const pillClassForTone = (tone) => (
+      tone === 'plum'
+        ? 'bg-plum-light text-plum border-plum-border'
+        : tone === 'amber'
+          ? 'bg-amberWarm-light text-amberWarm border-amberWarm-border'
+          : 'bg-pine-light text-pine border-pine-border'
+    );
+
+    if (state.bedGuideTab === 'beds') {
+      const broFirstBed = specs.brothers.beds[0];
+      const broSg = describeBedVsSg(broFirstBed.widthCm, broFirstBed.sleepers);
+      const broSummaryTag = specs.brothers.beds.length > 1
+        ? `2× ${broFirstBed.widthCm} cm · ${broSg.text}`
+        : `1× ${broFirstBed.widthCm} cm · ${broSg.text}`;
+
+      // Sister & Parents Card(s)
+      let parentsSisterCardHtml = '';
+      const highlightWidths = {
+        sister: [],
+        parents: [],
+        brothers: specs.brothers.beds.map((b) => b.widthCm),
+      };
+
+      if (specs.isSolo && specs.sisterSolo) {
+        const sisBed = specs.sisterSolo.beds[0];
+        const sisSg = describeBedVsSg(sisBed.widthCm, 1);
+        const parBed = specs.parents.beds[0];
+        const parSg = describeBedVsSg(parBed.widthCm, parBed.sleepers);
+        highlightWidths.sister.push(sisBed.widthCm);
+        highlightWidths.parents.push(...specs.parents.beds.map((b) => b.widthCm));
+
+        parentsSisterCardHtml = `
+          <div class="rounded-2xl bg-white border-2 border-plum-border p-4 space-y-3 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-plum-light text-plum border border-plum-border">Sister’s Solo Room (2+2+1)</span>
+                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-semibold border ${pillClassForTone(sisSg.tone)}">${sisBed.widthCm} cm · ${sisSg.text}</span>
+              </div>
+              <h4 class="font-serif text-base font-semibold text-ink mt-1.5">${escapeHtml(specs.sisterSolo.label)}</h4>
+              <div class="mt-2 py-2 rounded-xl bg-paper border border-stoneLine/70">
+                ${renderBedGroupSvg(specs.sisterSolo.beds)}
+              </div>
+              <p class="text-xs text-inkSoft mt-2 leading-relaxed">${escapeHtml(specs.sisterSolo.note)}</p>
+            </div>
+            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11.5px]">
+              <div>
+                <span class="font-semibold text-ink">Parents’ Room:</span>
+                <span class="text-inkSoft">${escapeHtml(specs.parents.label)}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-medium border ${pillClassForTone(parSg.tone)}">${specs.parents.beds.length > 1 ? `2× ${parBed.widthCm} cm` : `1× ${parBed.widthCm} cm`} · ${parSg.text}</span>
+            </div>
+          </div>
+        `;
+      } else if (specs.parentsSister) {
+        const sisBed = specs.parentsSister.beds.find((b) => b.isSister) || specs.parentsSister.beds[specs.parentsSister.beds.length - 1];
+        const parBeds = specs.parentsSister.beds.filter((b) => !b.isSister);
+        const sisSg = describeBedVsSg(sisBed.widthCm, 1);
+        highlightWidths.sister.push(sisBed.widthCm);
+        highlightWidths.parents.push(...parBeds.map((b) => b.widthCm));
+
+        parentsSisterCardHtml = `
+          <div class="rounded-2xl bg-white border-2 border-plum-border p-4 space-y-3 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-plum-light text-plum border border-plum-border">Parents + Sister (3+2 Shared Room)</span>
+                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-semibold border ${pillClassForTone(sisSg.tone)}">Sister: ${sisBed.widthCm} cm (${sisBed.type})</span>
+              </div>
+              <h4 class="font-serif text-base font-semibold text-ink mt-1.5">${escapeHtml(specs.parentsSister.label)}</h4>
+              <div class="mt-2 py-2 rounded-xl bg-paper border border-stoneLine/70">
+                ${renderBedGroupSvg(specs.parentsSister.beds)}
+              </div>
+              <p class="text-xs text-inkSoft mt-2 leading-relaxed">${escapeHtml(specs.parentsSister.note)}</p>
+            </div>
+            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-inkSoft">
+              <span>Sister’s bed vs. SG: <strong class="text-ink">${sisSg.text}</strong></span>
+              <span>Parents: <strong class="text-ink">${parBeds.map((b) => `${b.widthCm} cm`).join(' + ')}</strong></span>
+            </div>
+          </div>
+        `;
+      }
+
+      bodyEl.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.12em] font-semibold text-maple">Stop ${stop.id} · ${escapeHtml(stop.city)} (${stop.nights}N)</div>
+            <div class="font-serif text-xl font-medium text-ink">${escapeHtml(opt.name)} ${isPickedAtStop ? '<span class="ml-1.5 px-2 py-0.5 rounded-full font-sans text-[10.5px] font-semibold bg-pine text-white align-middle">Current Pick</span>' : ''}</div>
+          </div>
+          <div class="text-[11px] text-inkMuted">Silhouettes drawn to scale (~48 cm adult shoulders)</div>
+        </div>
+
+        <!-- Side-by-Side: Sister & Parents' Room | Brothers' Room -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${parentsSisterCardHtml}
+
+          <div class="rounded-2xl bg-white border-2 ${broSg.tone === 'amber' ? 'border-amberWarm-border' : 'border-pine-border'} p-4 space-y-3 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-pine-light text-pine border border-pine-border">Brothers’ Room</span>
+                <span class="px-2 py-0.5 rounded-full text-[10.5px] font-semibold border ${pillClassForTone(broSg.tone)}">${broSummaryTag}</span>
+              </div>
+              <h4 class="font-serif text-base font-semibold text-ink mt-1.5">${escapeHtml(specs.brothers.label)}</h4>
+              <div class="mt-2 py-2 rounded-xl bg-paper border border-stoneLine/70">
+                ${renderBedGroupSvg(specs.brothers.beds, { joined: Boolean(specs.brothers.joinedBeds) })}
+              </div>
+              <p class="text-xs text-inkSoft mt-2 leading-relaxed">${escapeHtml(specs.brothers.note)}</p>
+            </div>
+            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-inkSoft">
+              <span>Total sleeping width: <strong class="text-ink">${specs.brothers.beds.reduce((s, b) => s + b.widthCm, 0)} cm</strong></span>
+              <span>${specs.brothers.beds.length === 1 ? '1 shared mattress' : '2 separate mattresses'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Singapore Mattress Comparison Ladder -->
+        <div class="rounded-2xl bg-white border border-stoneLine p-4 sm:p-5 space-y-2.5">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <h4 class="font-serif text-lg font-medium text-ink">How Japanese Hotel Beds Compare to Singapore Mattresses</h4>
+              <p class="text-xs text-inkSoft">Dashed red lines show standard Singapore widths (Single 91 · Super Single 107 · Queen 152 · King 183 cm). Colored pills mark the beds used on Stop ${stop.id}.</p>
+            </div>
+          </div>
+          ${renderBedReferenceLadderSvg(highlightWidths)}
+        </div>
+      `;
+    } else {
+      // TAB 2: ROOM FOOTPRINTS & OPEN 28" SUITCASES
+      const roomsToDraw = [];
+      if (specs.isSolo && specs.sisterSolo) {
+        roomsToDraw.push({ role: 'Sister’s Solo Room', accent: 'plum', room: specs.sisterSolo });
+        roomsToDraw.push({ role: 'Parents’ Room', accent: 'pine', room: specs.parents });
+      } else if (specs.parentsSister) {
+        roomsToDraw.push({ role: 'Parents + Sister’s Room', accent: 'plum', room: specs.parentsSister });
+      }
+      const broTone = describeBedVsSg(specs.brothers.beds[0].widthCm, specs.brothers.beds[0].sleepers).tone;
+      roomsToDraw.push({ role: 'Brothers’ Room', accent: broTone === 'amber' ? 'amber' : 'pine', room: specs.brothers });
+
+      const cardsHtml = roomsToDraw.map((item) => {
+        const fp = renderRoomFootprintSvg(item.room, item.accent);
+        return `
+          <div class="rounded-2xl bg-white border border-stoneLine p-4 space-y-2.5 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                <span class="text-[10.5px] uppercase tracking-[0.11em] font-semibold ${item.accent === 'plum' ? 'text-plum' : 'text-pine'}">${escapeHtml(item.role)}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border ${fp.clearance.cls}">${fp.clearance.label}</span>
+              </div>
+              <h4 class="font-serif text-base font-semibold text-ink leading-snug">${escapeHtml(item.room.label)}</h4>
+              <div class="mt-2.5">${fp.svg}</div>
+            </div>
+            <p class="text-[11.5px] text-inkSoft leading-relaxed">${escapeHtml(item.room.note)}</p>
+          </div>
+        `;
+      }).join('');
+
+      // 7-Stop Itinerary Room Size Comparison Bars (Brothers vs. Sister's Room)
+      const itineraryBarsHtml = STOPS.map((s) => {
+        const sOpt = getSelectedOptionForStop(s, state.mode);
+        const sSpec = getBedSpecsForOption(s, sOpt, state.mode);
+        const broM2 = sSpec.brothers.areaM2;
+        const sisRoom = sSpec.isSolo ? sSpec.sisterSolo : sSpec.parentsSister;
+        const sisM2 = sisRoom ? sisRoom.areaM2 : broM2;
+        const broPct = Math.min(100, Math.round((broM2 / 83) * 100));
+        const sisPct = Math.min(100, Math.round((sisM2 / 83) * 100));
+        const isCur = s.id === stop.id;
+
+        return `
+          <button type="button" data-bg-jump-stop="${s.id}" class="bg-jump-stop w-full text-left p-2.5 rounded-xl border transition-colors cursor-pointer ${isCur ? 'bg-pine-light/45 border-pine' : 'bg-paper/70 border-stoneLine hover:bg-white'}">
+            <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
+              <span class="font-semibold text-ink">Stop ${s.id} · ${escapeHtml(s.city.split(' ')[0])} <span class="font-normal text-inkMuted">(${escapeHtml(sOpt.shortName)})</span></span>
+              <span class="text-[11px] text-inkSoft tabular-nums">Sis: <strong class="text-plum">${sisM2} m²</strong> ${sSpec.isSolo ? '(solo)' : '(3p)'} · Bros: <strong class="text-pine">${broM2} m²</strong></span>
+            </div>
+            <div class="space-y-1">
+              <div class="w-full h-1.5 rounded-full bg-sand overflow-hidden"><div class="h-full rounded-full bg-plum" style="width:${Math.max(10, sisPct)}%"></div></div>
+              <div class="w-full h-1.5 rounded-full bg-sand overflow-hidden"><div class="h-full rounded-full bg-pine" style="width:${Math.max(10, broPct)}%"></div></div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      bodyEl.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.12em] font-semibold text-maple">Stop ${stop.id} · ${escapeHtml(stop.city)} (${stop.nights}N)</div>
+            <div class="font-serif text-xl font-medium text-ink">${escapeHtml(opt.name)}</div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-inkSoft">
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-xs bg-maple/20 border border-maple inline-block"></span>Open 28" suitcase (75×100 cm)</span>
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-xs bg-sand border border-stoneLine inline-block"></span>Bath / Entry</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 ${roomsToDraw.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4">
+          ${cardsHtml}
+        </div>
+
+        <div class="rounded-2xl bg-white border border-stoneLine p-4 sm:p-5 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="font-serif text-lg font-medium text-ink">Room Size Across Your 7-Stop Trip</h4>
+            <div class="flex items-center gap-3 text-[11px] text-inkSoft">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-plum"></span>Sister’s Room</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-pine"></span>Brothers’ Room</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${itineraryBarsHtml}</div>
+        </div>
+      `;
+
+      bodyEl.querySelectorAll('.bg-jump-stop').forEach((b) => {
+        b.addEventListener('click', () => {
+          state.bedGuideStopId = Number(b.dataset.bgJumpStop);
+          state.bedGuideOptId = null;
+          renderBedGuideModal();
+        });
+      });
+    }
+  }
 
   // ===================================================================
   // VERIFIED GEOGRAPHIC COORDINATES FOR EDITORIAL SVG RELATIVE MAPS
@@ -1223,6 +2590,10 @@
             <span>${isOpen ? 'Hide' : 'Hotel Guide'} · Baths, Meals &amp; Verdict</span>
             <span class="text-[10px]">${isOpen ? '▲' : '▼'}</span>
           </button>
+          <button type="button" data-bed-guide-stop="${stop.id}" class="bed-guide-trigger-btn inline-flex items-center gap-1 text-xs font-medium text-plum hover:underline underline-offset-2 transition-colors cursor-pointer">
+            <span aria-hidden="true">📏</span>
+            <span>Bed &amp; Room Sizes</span>
+          </button>
           <button type="button" data-math-stop="${stop.id}" class="math-toggle-btn inline-flex items-center gap-1.5 text-xs font-medium text-inkMuted hover:text-ink transition-colors cursor-pointer">
             <span>${state.openMathDrawers[stop.id] ? 'Hide' : 'Show'} exact math &amp; notes</span>
             <span class="text-[10px]">${state.openMathDrawers[stop.id] ? '▲' : '▼'}</span>
@@ -1263,9 +2634,26 @@
     if (!stop.hasStopConfigurator) return '';
     const bedSavingsHint = getStop7BedSavingsHint(stop);
     const bfCreditTotal = CONFIG.breakfastValueSgd * (stop.nights || 3);
+    const pickedOpt = getSelectedOptionForStop(stop, state.mode);
+    const specs = getBedSpecsForOption(stop, pickedOpt, state.mode);
+
+    const broBed = specs.brothers.beds[0];
+    const broSg = describeBedVsSg(broBed.widthCm, broBed.sleepers);
+    const broTitle = specs.brothers.beds.length > 1
+      ? `2× ${broBed.widthCm} cm Twin`
+      : `1× ${broBed.widthCm} cm Shared`;
+
+    const sisRoom = specs.isSolo && specs.sisterSolo ? specs.sisterSolo : specs.parentsSister;
+    const sisBed = specs.isSolo && specs.sisterSolo
+      ? specs.sisterSolo.beds[0]
+      : (specs.parentsSister.beds.find((b) => b.isSister) || specs.parentsSister.beds[specs.parentsSister.beds.length - 1]);
+    const sisSg = describeBedVsSg(sisBed.widthCm, 1);
+    const sisHeading = specs.isSolo
+      ? `Sister Solo: ${sisBed.widthCm} cm (${sisRoom.areaM2} m²)`
+      : `Parents + Sister: ${sisBed.widthCm} cm ${sisBed.type} (${sisRoom.areaM2} m²)`;
 
     return `
-      <div class="mb-4 p-3.5 sm:p-4 rounded-2xl bg-sand/70 border border-stoneLine">
+      <div class="mb-4 p-3.5 sm:p-4 rounded-2xl bg-sand/70 border border-stoneLine space-y-3.5">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <div>
             <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
@@ -1294,6 +2682,38 @@
               <button type="button" data-s7-meal="bf" role="radio" aria-checked="${state.stop7Meal === 'bf'}" class="s7-meal-btn px-2.5 py-2 rounded-lg text-xs transition-all cursor-pointer text-center leading-tight ${state.stop7Meal === 'bf' ? 'bg-pine text-white font-semibold shadow-xs' : 'text-inkSoft hover:text-ink font-medium'}">
                 With Breakfast (3m)
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IDEA 2: Live Bed Size Scale Strip (Brothers + Sister/Parents for Selected Tokyo Hotel) -->
+        <div class="pt-3 border-t border-stoneLine/80">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-inkMuted">
+              Live Bed Scale · ${escapeHtml(pickedOpt.shortName)} (vs. SG Queen 152 cm / Super Single 107 cm)
+            </span>
+            <button type="button" data-bed-guide-stop="7" class="bed-guide-trigger-btn inline-flex items-center gap-1 text-[11px] font-semibold text-pine hover:underline underline-offset-2 cursor-pointer">
+              <span aria-hidden="true">📏</span>
+              <span>Compare All Beds &amp; Suitcases →</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="p-2.5 rounded-xl bg-white border ${broSg.tone === 'amber' ? 'border-amberWarm-border' : 'border-stoneLine'} flex items-center gap-3">
+              <div class="w-28 sm:w-32 shrink-0">${renderBedGroupSvg(specs.brothers.beds, { compact: true })}</div>
+              <div class="min-w-0 text-[11px]">
+                <div class="font-semibold text-ink">Brothers: ${broTitle} (${specs.brothers.areaM2} m²)</div>
+                <div class="mt-0.5 font-medium ${broSg.tone === 'amber' ? 'text-amberWarm' : 'text-pine'}">${broSg.text}</div>
+                <div class="text-[10.5px] text-inkMuted mt-0.5 leading-snug">${state.stop7Beds === 'double' ? 'Cozy shoulder-to-shoulder for 2 adults' : 'Separate beds & duvets for both brothers'}</div>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-white border border-plum-border/80 flex items-center gap-3">
+              <div class="w-28 sm:w-32 shrink-0">${renderBedGroupSvg(sisRoom.beds, { compact: true })}</div>
+              <div class="min-w-0 text-[11px]">
+                <div class="font-semibold text-ink">${escapeHtml(sisHeading)}</div>
+                <div class="mt-0.5 font-medium ${sisSg.tone === 'amber' ? 'text-amberWarm' : 'text-plum'}">Sister: ${sisSg.text}</div>
+                <div class="text-[10.5px] text-inkMuted mt-0.5 leading-snug">${specs.isSolo ? 'Own solo room & bath · Parents get clean Twin' : '3-pax shared room · Parents take the 2 main beds'}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1540,6 +2960,9 @@
         renderStops();
       });
     });
+    container.querySelectorAll('.bed-guide-trigger-btn').forEach((btn) => {
+      btn.addEventListener('click', () => openBedGuideModal(Number(btn.dataset.bedGuideStop)));
+    });
     container.querySelectorAll('.jump-stop-map-btn').forEach((btn) => {
       btn.addEventListener('click', () => openMapForStop(Number(btn.dataset.pinStop)));
     });
@@ -1729,6 +3152,7 @@
     renderStops();
     renderTotalsAndSummary(animate);
     renderGoogleMapsPanel();
+    if (state.bedGuideOpen) renderBedGuideModal();
 
     if (global.HokkaidoAuditModule) {
       global.HokkaidoAuditModule.syncFx();
@@ -2109,6 +3533,7 @@
   function init() {
     if (initialized) return;
     initialized = true;
+    ensureBedGuideUI();
 
     const retryBtn = document.getElementById('trip-data-retry-btn');
     if (retryBtn) retryBtn.addEventListener('click', loadTripData);
@@ -2221,6 +3646,7 @@
         closeExportModal();
         closeImportModal();
         closeMapModal();
+        closeBedGuideModal();
       }
     });
 
