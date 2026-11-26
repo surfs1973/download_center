@@ -182,16 +182,6 @@
             beds: [{ widthCm: extractCmFromText(sisPart, 140), sleepers: 1, occupant: 'Sister', type: 'Wide Single / Double' }],
             note: 'Sister gets a full 140 cm double bed all to herself plus her own bathroom right off the SG flight.',
           },
-          parents: {
-            label: 'Parents’ Room (23 m² Standard Twin)',
-            areaM2: 23,
-            suitcases: 2,
-            beds: [
-              { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
-              { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
-            ],
-            note: 'Zero extra beds — clean two-bed layout for Parents.',
-          },
         };
       }
       return {
@@ -261,16 +251,6 @@
             suitcases: 1,
             beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed' }],
             note: 'Sister gets a proper 140 cm Double bed & private bathroom all to herself (no extra bed!).',
-          },
-          parents: {
-            label: 'Parents’ Room (22 m² Standard Twin)',
-            areaM2: 22,
-            suitcases: 2,
-            beds: [
-              { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Wide Twin' },
-              { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Wide Twin' },
-            ],
-            note: 'Two roomy 120 cm beds with no extra bed taking up living space.',
           },
         };
       }
@@ -400,16 +380,6 @@
             beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed' }],
             note: 'Sister gets a private 140 cm double bed + her own washer-dryer for 3 nights in Hakodate.',
           },
-          parents: {
-            label: 'Parents’ Room (21 m² Twin)',
-            areaM2: 21,
-            suitcases: 2,
-            beds: [
-              { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
-              { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
-            ],
-            note: 'Two proper twin beds with zero extra bed crowding.',
-          },
         };
       }
       return {
@@ -464,13 +434,16 @@
 
     // 7A Ginza: Hotel Gracery Ginza
     if (/gracery/i.test(hay)) {
-      const broArea = extractM2FromText(broPart, isDoubleBros ? 18 : 24);
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 15 : 23);
       const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 110);
+      const parArea = extractM2FromText(parPart, 23);
+      const parW = extractCmFromText(parPart, 110);
+      const isSofaTriple = /sofa\s*bed/i.test(parPart);
       return {
         isSolo: false,
         brothers: {
           label: isDoubleBros
-            ? `Brothers’ Room (${broArea} m² Standard Double)`
+            ? `Brothers’ Room (${broArea} m² Concept Flooring Double)`
             : `Brothers’ Room (${broArea} m² Standard Twin)`,
           areaM2: broArea,
           suitcases: 2,
@@ -481,19 +454,25 @@
                 { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
               ],
           note: isDoubleBros
-            ? '140 cm bed is 12 cm narrower than an SG Queen — noticeable shoulder-to-shoulder fit for 2 adults.'
-            : 'Proper 110 cm twin beds (~SG Super Single each) with solid central-Ginza floor space.',
+            ? `${broW} cm bed is 12 cm narrower than an SG Queen — noticeable shoulder-to-shoulder fit for 2 adults in a ${broArea} m² room.`
+            : `Proper ${broW} cm twin beds (~SG Super Single each) with solid ${broArea} m² central-Ginza floor space.`,
         },
         parentsSister: {
-          label: `Parents + Sister (${extractM2FromText(parPart, 25)} m² Triple)`,
-          areaM2: extractM2FromText(parPart, 25),
+          label: isSofaTriple
+            ? `Parents + Sister (${parArea} m² Standard Twin + Sofa Bed)`
+            : `Parents + Sister (${parArea} m² Standard Triple)`,
+          areaM2: parArea,
           suitcases: 3,
           beds: [
-            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
-            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
-            { widthCm: 95, sleepers: 1, occupant: 'Sister', type: 'Extra Bed', isSister: true, isExtra: true },
+            { widthCm: parW, sleepers: 1, occupant: 'Parent 1', type: 'Single Bed' },
+            { widthCm: parW, sleepers: 1, occupant: 'Parent 2', type: 'Single Bed' },
+            isSofaTriple
+              ? { widthCm: 95, sleepers: 1, occupant: 'Sister', type: 'Sofa Bed', isSister: true, isExtra: true }
+              : { widthCm: parW, sleepers: 1, occupant: 'Sister', type: 'Single Bed', isSister: true },
           ],
-          note: 'Standard Tokyo triple: Sister sleeps on a ~95 cm extra bed (≈ SG Single) and 3 suitcases will feel snug.',
+          note: isSofaTriple
+            ? 'Standard Twin + ~95 cm sofa bed (≈ SG Single); 3 suitcases will feel snug in 23 m².'
+            : `True 3-bed Tokyo triple: Sister gets a real ${parW} cm single bed (~SG Super Single) instead of a folding rollaway; 3 suitcases stay tidy in ${parArea} m².`,
         },
       };
     }
@@ -501,12 +480,12 @@
     // 7B Ginza / Legacy 7B Okachimachi: Super Hotel
     if (/super\s*hotel/i.test(hay)) {
       const isConnecting = /connect/i.test(hay);
-      const broArea = extractM2FromText(broPart, isDoubleBros ? 12 : 18);
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 12 : 17);
       const broW = extractCmFromText(broPart, isDoubleBros ? 150 : 100);
       const brosObj = {
         label: isDoubleBros
-          ? `Brothers’ Room (${broArea} m² Double)`
-          : `Brothers’ Room (${broArea} m² Twin)`,
+          ? `Brothers’ Room (${broArea} m² Standard Double)`
+          : `Brothers’ Room (${broArea} m² Deluxe Twin)`,
         areaM2: broArea,
         suitcases: 2,
         beds: isDoubleBros
@@ -517,27 +496,44 @@
             ],
         note: isDoubleBros
           ? `Super Hotel’s ${broW} cm bed is close to an SG Queen, but the ${broArea} m² floor is very tight for 2 open suitcases.`
-          : 'Two separate beds avoid sharing, though floor space stays compact for packing.',
+          : `Two separate beds avoid sharing, though ${broArea} m² floor space stays compact for packing.`,
       };
 
-      if (isConnecting || solo) {
+      if (isConnecting) {
         const connArea = extractM2FromText(parPart, 24);
+        const halfArea = Math.round(connArea / 2);
         return {
           isSolo: true,
+          isConnecting: true,
           brothers: brosObj,
           sisterSolo: {
-            label: `Sister’s Adjoining Room (~${Math.round(connArea / 2)} m² inside ${connArea} m² Connecting)`,
-            areaM2: Math.round(connArea / 2),
+            label: `Sister’s Adjoining Room (~${halfArea} m² inside ${connArea} m² Connecting)`,
+            areaM2: halfArea,
             suitcases: 1,
             beds: [{ widthCm: 150, sleepers: 1, occupant: 'Sister', type: 'Wide Bed (Own Room)' }],
             note: 'Internal connecting door gives Sister her own separate bedroom, bathroom, and ~150 cm bed (≈ SG Queen solo!).',
           },
           parents: {
-            label: `Parents’ Adjoining Room (~${Math.round(connArea / 2)} m² inside Connecting)`,
-            areaM2: Math.round(connArea / 2),
+            label: `Parents’ Adjoining Room (~${halfArea} m² inside ${connArea} m² Connecting)`,
+            areaM2: halfArea,
             suitcases: 2,
             beds: [{ widthCm: 150, sleepers: 2, occupant: 'Parents', type: 'Wide Double (≈ SG Queen)' }],
             note: 'Parents share one ~150 cm wide bed (≈ SG Queen) with an internal door directly to Sister’s room.',
+          },
+        };
+      }
+
+      if (solo) {
+        const sisArea = extractM2FromText(sisPart, 12);
+        return {
+          isSolo: true,
+          brothers: brosObj,
+          sisterSolo: {
+            label: `Sister’s Solo Room (${sisArea} m² Standard Double)`,
+            areaM2: sisArea,
+            suitcases: 1,
+            beds: [{ widthCm: extractCmFromText(sisPart, 150), sleepers: 1, occupant: 'Sister', type: 'Wide Double (Solo)' }],
+            note: 'Sister gets a ~150 cm wide bed (≈ SG Queen solo!) and private bathroom all to herself.',
           },
         };
       }
@@ -558,61 +554,58 @@
       };
     }
 
-    // 7C Ginza: Sotetsu Fresa Inn (2+2+1 Only)
+    // 7C Ginza: Sotetsu Fresa Inn Ginza-Sanchome (2+2+1 Only)
     if (/sotetsu|fresa/i.test(hay)) {
-      const broArea = extractM2FromText(broPart, isDoubleBros ? 13 : 17);
-      const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 100);
-      const sisArea = extractM2FromText(sisPart, 12.5);
+      const broArea = extractM2FromText(broPart, isDoubleBros ? 15.3 : 18.6);
+      const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 120);
+      const sisArea = extractM2FromText(sisPart, 12);
+      const sisW = extractCmFromText(sisPart, 140);
       return {
         isSolo: true,
         brothers: {
           label: isDoubleBros
-            ? `Brothers’ Room (${broArea} m² Double)`
-            : `Brothers’ Room (${broArea} m² Twin)`,
+            ? `Brothers’ Room (${broArea} m² Comfort Double)`
+            : `Brothers’ Room (${broArea} m² Superior Twin)`,
           areaM2: broArea,
           suitcases: 2,
           beds: isDoubleBros
-            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Double' }]
+            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Serta Double' }]
             : [
-                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Compact Twin' },
-                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Compact Twin' },
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Serta Wide Twin' },
+                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Serta Wide Twin' },
               ],
           note: isDoubleBros
-            ? 'Very compact Tokyo room (13 m²) + 140 cm bed (12 cm < SG Queen) — open 1 suitcase at a time.'
-            : 'Two 100 cm beds keep Brothers separate, though 17 m² stays snug for 2 big luggage bags.',
+            ? `Compact ${broArea} m² Tokyo room + ${broW} cm Serta double bed (12 cm < SG Queen) — open 1 suitcase at a time.`
+            : `Generous 2× ${broW} cm Serta twin beds (wider than SG Super Single each), though ${broArea} m² stays tidy for 2 large suitcases.`,
         },
         sisterSolo: {
-          label: `Sister’s Solo Room (${sisArea} m² Double/Single)`,
+          label: `Sister’s Solo Room (${sisArea} m² Standard Single)`,
           areaM2: sisArea,
           suitcases: 1,
-          beds: [{ widthCm: extractCmFromText(sisPart, 140), sleepers: 1, occupant: 'Sister', type: 'Double Bed (Solo)' }],
-          note: 'Sister gets a full 140 cm double bed & private bathroom to herself (no extra bed!) — compact floor is totally fine for 1 suitcase.',
-        },
-        parents: {
-          label: 'Parents’ Room (~17 m² Twin)',
-          areaM2: 17,
-          suitcases: 2,
-          beds: [
-            { widthCm: 100, sleepers: 1, occupant: 'Parent 1', type: 'Compact Twin' },
-            { widthCm: 100, sleepers: 1, occupant: 'Parent 2', type: 'Compact Twin' },
-          ],
-          note: 'Clean 2-bed room with no 3rd extra bed crowding the floor.',
+          beds: [{ widthCm: sisW, sleepers: 1, occupant: 'Sister', type: 'Serta Double Bed (Solo)' }],
+          note: `Sister gets a full ${sisW} cm Serta double bed & private bathroom to herself (no extra bed!) — compact ${sisArea} m² floor is fine for 1 suitcase.`,
         },
       };
     }
 
     // 7D / 7E: remm Tokyo Kyobashi & remm Hibiya (2+2+1 Only)
     if (/remm/i.test(hay)) {
-      const broArea = extractM2FromText(broPart, isDoubleBros ? 14.4 : 24.4);
+      const isHibiya = /hibiya/i.test(hay);
+      const broArea = extractM2FromText(broPart, isHibiya ? (isDoubleBros ? 15.1 : 23) : (isDoubleBros ? 15 : 18.4));
       const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 110);
-      const sisArea = extractM2FromText(sisPart, 14.4);
+      const sisArea = extractM2FromText(sisPart, isHibiya && isDoubleBros ? 15.1 : 15);
       const sisW = extractCmFromText(sisPart, 140);
+      const broRoomName = isHibiya
+        ? (isDoubleBros ? 'Economy Double' : 'Twin')
+        : (isDoubleBros ? 'Inside Semi-Double' : 'Economy Twin');
+      const sisRoomName = isHibiya
+        ? (isDoubleBros ? 'Economy Double' : 'Semi-Double')
+        : 'Inside Semi-Double';
+
       return {
         isSolo: true,
         brothers: {
-          label: isDoubleBros
-            ? `Brothers’ Room (${broArea} m² Semi-Double)`
-            : `Brothers’ Room (${broArea} m² Twin)`,
+          label: `Brothers’ Room (${broArea} m² ${broRoomName})`,
           areaM2: broArea,
           suitcases: 2,
           beds: isDoubleBros
@@ -622,25 +615,15 @@
                 { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Twin Bed' },
               ],
           note: isDoubleBros
-            ? '14.4 m² floor + 140 cm bed (12 cm narrower than SG Queen) — tight for 2 brothers + 2 suitcases.'
-            : 'Excellent ~24 m² Tokyo twin room with two 110 cm Silky remm beds and an in-room massage chair.',
+            ? `${broArea} m² floor + ${broW} cm bed (12 cm narrower than SG Queen) — tight for 2 brothers + 2 suitcases; includes in-room massage chair.`
+            : `${broArea} m² Tokyo twin room with two ${broW} cm Silky remm beds, bathtub, and an in-room massage chair.`,
         },
         sisterSolo: {
-          label: `Sister’s Solo Room (${sisArea} m² Semi-Double)`,
+          label: `Sister’s Solo Room (${sisArea} m² ${sisRoomName})`,
           areaM2: sisArea,
           suitcases: 1,
           beds: [{ widthCm: sisW, sleepers: 1, occupant: 'Sister', type: 'Silky remm Double' }],
-          note: 'Sister gets a plush 140 cm Silky remm double bed, private bathroom & massage chair all to herself!',
-        },
-        parents: {
-          label: 'Parents’ Room (~24 m² Twin)',
-          areaM2: 24,
-          suitcases: 2,
-          beds: [
-            { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
-            { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
-          ],
-          note: 'Generous ~24 m² Twin with zero extra beds and easy luggage clearance.',
+          note: `Sister gets a plush ${sisW} cm Silky remm double bed, private rain-shower bathroom & massage chair all to herself!`,
         },
       };
     }
@@ -722,16 +705,6 @@
               suitcases: 1,
               beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Double Bed (Solo)' }],
               note: 'Private solo room with a 140 cm double bed.',
-            },
-            parents: {
-              label: 'Parents’ Room (20 m² Twin)',
-              areaM2: 20,
-              suitcases: 2,
-              beds: [
-                { widthCm: 110, sleepers: 1, occupant: 'Parent 1', type: 'Twin Bed' },
-                { widthCm: 110, sleepers: 1, occupant: 'Parent 2', type: 'Twin Bed' },
-              ],
-              note: 'Two separate twin beds with zero extra beds.',
             },
           }
         : {
@@ -1265,16 +1238,39 @@
       if (specs.isSolo && specs.sisterSolo) {
         const sisBed = specs.sisterSolo.beds[0];
         const sisSg = describeBedVsSg(sisBed.widthCm, 1);
-        const parBed = specs.parents.beds[0];
-        const parSg = describeBedVsSg(parBed.widthCm, parBed.sleepers);
         highlightWidths.sister.push(sisBed.widthCm);
-        highlightWidths.parents.push(...specs.parents.beds.map((b) => b.widthCm));
+
+        let soloFooterHtml = `
+            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-inkSoft">
+              <span>Room size: <strong class="text-ink">${specs.sisterSolo.areaM2} m²</strong> · Private solo bathroom</span>
+              <span>Parents’ room booked separately</span>
+            </div>
+        `;
+
+        if (specs.isConnecting && specs.parents) {
+          const parBed = specs.parents.beds[0];
+          const parSg = describeBedVsSg(parBed.widthCm, parBed.sleepers);
+          highlightWidths.parents.push(...specs.parents.beds.map((b) => b.widthCm));
+          soloFooterHtml = `
+            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11.5px]">
+              <div>
+                <span class="font-semibold text-ink">Parents’ Room:</span>
+                <span class="text-inkSoft">${escapeHtml(specs.parents.label)}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-medium border ${pillClassForTone(parSg.tone)}">${specs.parents.beds.length > 1 ? `2× ${parBed.widthCm} cm` : `1× ${parBed.widthCm} cm`} · ${parSg.text}</span>
+            </div>
+          `;
+        }
+
+        const sisBadgeLabel = specs.isConnecting
+          ? 'Sister’s Adjoining Room (Connecting Suite)'
+          : 'Sister’s Solo Room (2+2+1)';
 
         parentsSisterCardHtml = `
           <div class="rounded-2xl bg-white border-2 border-plum-border p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-plum-light text-plum border border-plum-border">Sister’s Solo Room (2+2+1)</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-plum-light text-plum border border-plum-border">${sisBadgeLabel}</span>
                 <span class="px-2 py-0.5 rounded-full text-[10.5px] font-semibold border ${pillClassForTone(sisSg.tone)}">${sisBed.widthCm} cm · ${sisSg.text}</span>
               </div>
               <h4 class="font-serif text-base font-semibold text-ink mt-1.5">${escapeHtml(specs.sisterSolo.label)}</h4>
@@ -1283,13 +1279,7 @@
               </div>
               <p class="text-xs text-inkSoft mt-2 leading-relaxed">${escapeHtml(specs.sisterSolo.note)}</p>
             </div>
-            <div class="pt-2.5 border-t border-stoneLine/80 flex flex-wrap items-center justify-between gap-2 text-[11.5px]">
-              <div>
-                <span class="font-semibold text-ink">Parents’ Room:</span>
-                <span class="text-inkSoft">${escapeHtml(specs.parents.label)}</span>
-              </div>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-medium border ${pillClassForTone(parSg.tone)}">${specs.parents.beds.length > 1 ? `2× ${parBed.widthCm} cm` : `1× ${parBed.widthCm} cm`} · ${parSg.text}</span>
-            </div>
+            ${soloFooterHtml}
           </div>
         `;
       } else if (specs.parentsSister) {
@@ -1367,8 +1357,14 @@
       // TAB 2: ROOM FOOTPRINTS & OPEN 28" SUITCASES
       const roomsToDraw = [];
       if (specs.isSolo && specs.sisterSolo) {
-        roomsToDraw.push({ role: 'Sister’s Solo Room', accent: 'plum', room: specs.sisterSolo });
-        roomsToDraw.push({ role: 'Parents’ Room', accent: 'pine', room: specs.parents });
+        roomsToDraw.push({
+          role: specs.isConnecting ? 'Sister’s Adjoining Room' : 'Sister’s Solo Room',
+          accent: 'plum',
+          room: specs.sisterSolo,
+        });
+        if (specs.isConnecting && specs.parents) {
+          roomsToDraw.push({ role: 'Parents’ Adjoining Room', accent: 'pine', room: specs.parents });
+        }
       } else if (specs.parentsSister) {
         roomsToDraw.push({ role: 'Parents + Sister’s Room', accent: 'plum', room: specs.parentsSister });
       }
@@ -2683,9 +2679,16 @@
       ? specs.sisterSolo.beds[0]
       : (specs.parentsSister.beds.find((b) => b.isSister) || specs.parentsSister.beds[specs.parentsSister.beds.length - 1]);
     const sisSg = describeBedVsSg(sisBed.widthCm, 1);
-    const sisHeading = specs.isSolo
-      ? `Sister Solo: ${sisBed.widthCm} cm (${sisRoom.areaM2} m²)`
-      : `Parents + Sister: ${sisBed.widthCm} cm ${sisBed.type} (${sisRoom.areaM2} m²)`;
+    const sisHeading = specs.isConnecting
+      ? `Sister Adjoining: ${sisBed.widthCm} cm (${sisRoom.areaM2} m²)`
+      : specs.isSolo
+        ? `Sister Solo: ${sisBed.widthCm} cm (${sisRoom.areaM2} m²)`
+        : `Parents + Sister: ${sisBed.widthCm} cm ${sisBed.type} (${sisRoom.areaM2} m²)`;
+    const sisSubnote = specs.isConnecting
+      ? `Adjoining room & bath inside ${(sisRoom.areaM2 || 12) * 2} m² Connecting Suite w/ Parents`
+      : specs.isSolo
+        ? 'Own solo room & private bathroom (no extra bed)'
+        : '3-pax shared room · Parents take the 2 main beds';
 
     return `
       <div class="mb-4 p-3.5 sm:p-4 rounded-2xl bg-sand/70 border border-stoneLine space-y-3.5">
@@ -2747,7 +2750,7 @@
               <div class="min-w-0 text-[11px]">
                 <div class="font-semibold text-ink">${escapeHtml(sisHeading)}</div>
                 <div class="mt-0.5 font-medium ${sisSg.tone === 'amber' ? 'text-amberWarm' : 'text-plum'}">Sister: ${sisSg.text}</div>
-                <div class="text-[10.5px] text-inkMuted mt-0.5 leading-snug">${specs.isSolo ? 'Own solo room & bath · Parents get clean Twin' : '3-pax shared room · Parents take the 2 main beds'}</div>
+                <div class="text-[10.5px] text-inkMuted mt-0.5 leading-snug">${escapeHtml(sisSubnote)}</div>
               </div>
             </div>
           </div>
