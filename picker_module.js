@@ -3246,6 +3246,8 @@
   /**
    * Returns a plain, JSON-serializable deep-cloned snapshot of the current picker state
    * (rooming mode, FX rate, Stop 7 toggles, and every stop's selected option & meal choices).
+   * Per-stop selections are keyed consistently by String(stop.id) inside `picks` and `stops`
+   * so individual stop keys can be merged cleanly across saved itineraries.
    */
   function getState() {
     const picksCopy = {};
@@ -3253,9 +3255,10 @@
 
     if (state.dataLoaded && STOPS.length > 0) {
       STOPS.forEach((stop) => {
+        const sKey = String(stop.id);
         const opt = getSelectedOptionForStop(stop, state.mode);
         const optId = opt ? opt.id : (state.picks[stop.id] || stop.baselineOptionId || null);
-        picksCopy[String(stop.id)] = optId;
+        picksCopy[sKey] = optId;
         const entry = {
           optionId: optId,
           hotel: opt ? opt.name : null,
@@ -3265,7 +3268,7 @@
           entry.beds = state.stop7Beds;
           entry.meal = state.stop7Meal;
         }
-        stopsSnapshot[String(stop.id)] = entry;
+        stopsSnapshot[sKey] = entry;
       });
     } else {
       Object.keys(state.picks).forEach((k) => {
@@ -3273,9 +3276,11 @@
       });
     }
 
+    const fxNum = Number(state.fxRate);
     return JSON.parse(JSON.stringify({
       mode: state.mode,
-      fxRate: Number(state.fxRate),
+      fx: fxNum,
+      fxRate: fxNum,
       stop7Beds: state.stop7Beds,
       stop7Meal: state.stop7Meal,
       picks: picksCopy,
@@ -3284,23 +3289,33 @@
   }
 
   /**
-   * Internal validator/applier used both by applyState() and loadTripData() (if buffered pre-load).
-   * Safely ignores unknown/retired option IDs (falling back to that stop's default).
+   * Pure, side-effect-free validator/normalizer for external state snapshots.
+   * Never mutates live `state` or touches the DOM.
+   * Safely falls back to stop defaults for any missing, unknown, or retired option IDs.
    */
-  function applyStateInternal(inputState) {
-    if (!inputState || typeof inputState !== 'object') return false;
+  function normalizeStateSnapshot(inputState, options = {}) {
+    const src = (inputState && typeof inputState === 'object') ? inputState : {};
+    const fallbackMode = options.fallbackMode || 'M1';
+    const fallbackFx = Number.isFinite(options.fallbackFx) ? options.fallbackFx : Number(CONFIG.defaultFxRate);
 
     // 1. Rooming mode (M1 / M2)
-    if (typeof inputState.mode === 'string') {
-      const m = inputState.mode.trim().toUpperCase();
-      if (m === 'M1' || m === 'M2') state.mode = m;
+    let resolvedMode = fallbackMode;
+    if (typeof src.mode === 'string') {
+      const m = src.mode.trim().toUpperCase();
+      if (m === 'M1' || m === 'M2') resolvedMode = m;
     }
 
-    // 2. FX rate (validated within [60, 220])
-    if (inputState.fxRate !== undefined && inputState.fxRate !== null && inputState.fxRate !== '') {
-      const parsedFx = Number(inputState.fxRate);
-      if (Number.isFinite(parsedFx) && parsedFx >= 60 && parsedFx <= 220) {
-        state.fxRate = parsedFx;
+    // 2. FX rate (optional valid fxOverride takes precedence over src.fx / src.fxRate)
+    let resolvedFx = fallbackFx;
+    const rawFxCandidates = [options.fxOverride, src.fx, src.fxRate];
+    for (let i = 0; i < rawFxCandidates.length; i += 1) {
+      const cand = rawFxCandidates[i];
+      if (cand !== undefined && cand !== null && cand !== '') {
+        const num = Number(cand);
+        if (Number.isFinite(num) && num >= 60 && num <= 220) {
+          resolvedFx = num;
+          break;
+        }
       }
     }
 
@@ -3313,52 +3328,166 @@
       || (PRESETS[0] && PRESETS[0].stop7Meal)
       || 'ro';
 
-    const stop7Entry = inputState.stops && (inputState.stops['7'] || inputState.stops[7]);
-    const rawBeds = inputState.stop7Beds !== undefined ? inputState.stop7Beds : (stop7Entry && stop7Entry.beds);
-    const rawMeal = inputState.stop7Meal !== undefined ? inputState.stop7Meal : (stop7Entry && stop7Entry.meal);
+    const inputMap = (src.picks && typeof src.picks === 'object')
+      ? src.picks
+      : (src.selections && typeof src.selections === 'object')
+        ? src.selections
+        : null;
+    const inputStops = (src.stops && typeof src.stops === 'object' && !Array.isArray(src.stops))
+      ? src.stops
+      : null;
 
-    if (rawBeds !== undefined) {
-      const b = String(rawBeds || '').trim().toLowerCase();
-      state.stop7Beds = (b === 'twin' || b === 'double') ? b : defaultStop7Beds;
+    const pick7Raw = inputMap ? (inputMap['7'] !== undefined ? inputMap['7'] : inputMap[7]) : undefined;
+    const pick7Obj = (pick7Raw && typeof pick7Raw === 'object') ? pick7Raw : null;
+    const stop7Entry = inputStops ? (inputStops['7'] || inputStops[7]) : null;
+
+    const rawBeds = (pick7Obj && pick7Obj.beds !== undefined)
+      ? pick7Obj.beds
+      : src.stop7Beds !== undefined
+        ? src.stop7Beds
+        : (stop7Entry && stop7Entry.beds !== undefined ? stop7Entry.beds : options.fallbackBeds);
+    const rawMeal = (pick7Obj && pick7Obj.meal !== undefined)
+      ? pick7Obj.meal
+      : src.stop7Meal !== undefined
+        ? src.stop7Meal
+        : (stop7Entry && stop7Entry.meal !== undefined ? stop7Entry.meal : options.fallbackMeal);
+
+    let resolvedBeds = defaultStop7Beds;
+    if (rawBeds !== undefined && rawBeds !== null) {
+      const b = String(rawBeds).trim().toLowerCase();
+      if (b === 'twin' || b === 'double') resolvedBeds = b;
     }
-    if (rawMeal !== undefined) {
-      const ml = String(rawMeal || '').trim().toLowerCase();
-      state.stop7Meal = (ml === 'ro' || ml === 'bf') ? ml : defaultStop7Meal;
+
+    let resolvedMeal = defaultStop7Meal;
+    if (rawMeal !== undefined && rawMeal !== null) {
+      const ml = String(rawMeal).trim().toLowerCase();
+      if (ml === 'ro' || ml === 'bf') resolvedMeal = ml;
     }
 
-    // 4. Per-stop option selections (validate against current STOPS; fall back to stop default if retired/unknown)
-    const inputPicks = inputState.picks && typeof inputState.picks === 'object' ? inputState.picks : null;
-    const inputStops = inputState.stops && typeof inputState.stops === 'object' ? inputState.stops : null;
-    const nextPicks = {};
-
+    // 4. Per-stop validated picks map (numeric stop.id keys for internal computeTotalsForPicks)
+    const resolvedPicks = {};
     STOPS.forEach((stop) => {
       const sKey = String(stop.id);
       const defaultOptId = (PRESETS[0] && PRESETS[0].picks && PRESETS[0].picks[sKey])
         || stop.baselineOptionId
         || (stop.options[0] && stop.options[0].id);
 
-      if (isStopLockedForMode(stop, state.mode)) {
-        nextPicks[stop.id] = (stop.options[0] && stop.options[0].id) || defaultOptId;
+      if (isStopLockedForMode(stop, resolvedMode)) {
+        resolvedPicks[stop.id] = (stop.options[0] && stop.options[0].id) || defaultOptId;
         return;
       }
 
       let requestedId = null;
-      if (inputPicks && (sKey in inputPicks || stop.id in inputPicks)) {
-        requestedId = inputPicks[sKey] !== undefined ? inputPicks[sKey] : inputPicks[stop.id];
+      if (inputMap && (sKey in inputMap || stop.id in inputMap)) {
+        const rawVal = inputMap[sKey] !== undefined ? inputMap[sKey] : inputMap[stop.id];
+        if (typeof rawVal === 'string') requestedId = rawVal;
+        else if (rawVal && typeof rawVal === 'object' && typeof rawVal.optionId === 'string') requestedId = rawVal.optionId;
       } else if (inputStops && (sKey in inputStops || stop.id in inputStops)) {
         const stObj = inputStops[sKey] !== undefined ? inputStops[sKey] : inputStops[stop.id];
-        if (stObj && typeof stObj === 'object') requestedId = stObj.optionId;
+        if (stObj && typeof stObj === 'object' && typeof stObj.optionId === 'string') requestedId = stObj.optionId;
       }
 
       const matched = typeof requestedId === 'string'
-        ? stop.options.find((o) => o.id === requestedId && !(state.mode === 'M2' && o.hideInMode2))
+        ? stop.options.find((o) => o.id === requestedId && !(resolvedMode === 'M2' && o.hideInMode2))
         : null;
 
-      nextPicks[stop.id] = matched ? matched.id : defaultOptId;
+      resolvedPicks[stop.id] = matched ? matched.id : defaultOptId;
     });
 
-    state.picks = nextPicks;
-    if (state.mode === 'M2') state.picks[1] = '1A';
+    if (resolvedMode === 'M2') resolvedPicks[1] = '1A';
+
+    return {
+      mode: resolvedMode,
+      fx: resolvedFx,
+      stop7Beds: resolvedBeds,
+      stop7Meal: resolvedMeal,
+      picks: resolvedPicks,
+    };
+  }
+
+  /**
+   * Pure, side-effect-free evaluator for Brother vs. Sister Comparison tab.
+   * Evaluates any saved state snapshot (optionally at a shared fxOverride) without
+   * mutating live planner state or touching the DOM.
+   */
+  function evaluateState(inputState, fxOverride) {
+    if (!state.dataLoaded || STOPS.length === 0) return null;
+
+    const norm = normalizeStateSnapshot(inputState, {
+      fxOverride,
+      fallbackMode: 'M1',
+      fallbackFx: Number(CONFIG.defaultFxRate),
+    });
+
+    const totals = computeTotalsForPicks(
+      norm.picks,
+      norm.mode,
+      norm.fx,
+      norm.stop7Beds,
+      norm.stop7Meal
+    );
+
+    const evaluatedStops = STOPS.map((stop) => {
+      const opt = getSelectedOptionForStop(stop, norm.mode, norm.picks, norm.stop7Beds, norm.stop7Meal);
+      const solo = isOptionSolo(opt, norm.mode);
+      const stopJpy = getOptionJpy(opt, norm.mode);
+      const perSiblingSgd = Math.round(stopJpy / norm.fx);
+      const mealLabel = opt.mealTag || 'Room Only';
+      const hotelId = String(opt.id || '').split('_')[0];
+      const optionKey = stop.hasStopConfigurator
+        ? `${stop.id}|${opt.id}|${norm.stop7Beds}|${norm.stop7Meal}|${solo ? 'solo' : '3+2'}`
+        : `${stop.id}|${opt.id}|${solo ? 'solo' : '3+2'}|${mealLabel}`;
+      const optionLabel = stop.hasStopConfigurator
+        ? `${norm.stop7Beds === 'double' ? 'Shared Double' : 'Twin (2 Beds)'} · ${mealLabel}`
+        : (resolveField(opt.roomBadge, norm.mode) || opt.shortName || opt.name);
+
+      return {
+        stopId: String(stop.id),
+        city: stop.city,
+        dates: stop.dates,
+        nights: Number(stop.nights),
+        hotelId,
+        hotelName: opt.name,
+        optionId: opt.id,
+        optionKey,
+        optionLabel,
+        mealLabel,
+        roomingLabel: solo ? '2+2+1 (Solo)' : '3+2',
+        perSiblingSgd,
+      };
+    });
+
+    return {
+      mode: norm.mode,
+      modeLabel: norm.mode === 'M2' ? 'Mode 2 · Always 3+2' : 'Mode 1 · Hybrid',
+      fx: norm.fx,
+      hotelTotalSgd: totals.hotelSgd,
+      mealsNetSgd: totals.mealsNetSgd,
+      fullTripSgd: totals.fullTripSgd,
+      soloNights: totals.soloNights,
+      stops: evaluatedStops,
+    };
+  }
+
+  /**
+   * Internal validator/applier used both by applyState() and loadTripData() (if buffered pre-load).
+   * Safely ignores unknown/retired option IDs (falling back to that stop's default).
+   */
+  function applyStateInternal(inputState) {
+    if (!inputState || typeof inputState !== 'object') return false;
+
+    const norm = normalizeStateSnapshot(inputState, {
+      fallbackMode: state.mode,
+      fallbackFx: state.fxRate,
+      fallbackBeds: state.stop7Beds,
+      fallbackMeal: state.stop7Meal,
+    });
+
+    state.mode = norm.mode;
+    state.fxRate = norm.fx;
+    state.stop7Beds = norm.stop7Beds;
+    state.stop7Meal = norm.stop7Meal;
+    state.picks = norm.picks;
 
     // Sync FX input element directly so it updates immediately even if focused
     const fxInput = document.getElementById('fx-input');
@@ -3557,5 +3686,5 @@
     loadTripData();
   }
 
-  global.HokkaidoPickerModule = { init, getState, applyState };
+  global.HokkaidoPickerModule = { init, getState, applyState, evaluateState };
 })(window);
