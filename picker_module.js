@@ -1799,12 +1799,20 @@
       }
 
       loadingEl.classList.add('hidden');
-      if (state.activeView === 'picker') {
+      const compareViewEl = document.getElementById('compare-view');
+      const compareIsOpen = Boolean(compareViewEl && !compareViewEl.classList.contains('hidden'));
+      if (state.activeView === 'picker' && !compareIsOpen) {
         pickerView.classList.remove('hidden');
       }
 
       renderDirectory();
       renderAll(false);
+
+      if (typeof global.dispatchEvent === 'function' && typeof CustomEvent === 'function') {
+        global.dispatchEvent(new CustomEvent('hokkaido-picker-ready', {
+          detail: { stopsCount: STOPS.length },
+        }));
+      }
 
       // Load external Audit Dashboard module in parallel after core config is ready
       loadAuditModule();
@@ -3258,7 +3266,9 @@
         const sKey = String(stop.id);
         const opt = getSelectedOptionForStop(stop, state.mode);
         const optId = opt ? opt.id : (state.picks[stop.id] || stop.baselineOptionId || null);
-        picksCopy[sKey] = optId;
+        picksCopy[sKey] = stop.hasStopConfigurator
+          ? { optionId: optId, beds: state.stop7Beds, meal: state.stop7Meal }
+          : optId;
         const entry = {
           optionId: optId,
           hotel: opt ? opt.name : null,
@@ -3686,5 +3696,9 @@
     loadTripData();
   }
 
-  global.HokkaidoPickerModule = { init, getState, applyState, evaluateState };
+  function isReady() {
+    return Boolean(state.dataLoaded && STOPS.length > 0);
+  }
+
+  global.HokkaidoPickerModule = { init, isReady, getState, applyState, evaluateState };
 })(window);
