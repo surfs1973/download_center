@@ -3,7 +3,7 @@
  * Hosted on GitHub so hokkaido_tokyo_2027_hotel_picker.html stays a lightweight shell.
  * Loads trip_data_2027.json and audit_module.js, renders all 7 stops, Stop 7 Tokyo
  * configurator, Split-Screen Map Explorer (SVG + Google Maps), Bed & Room Size Guide
- * (Singapore mattress scale + open suitcase footprints), and Share/Load Picks.
+ * (Singapore mattress scale + open suitcase footprints), Share Export, and JSON State Sync API.
  */
 (function (global) {
   'use strict';
@@ -49,12 +49,12 @@
     bedGuideTab: 'beds', // 'beds' | 'rooms'
     bedGuideStopId: 7,
     bedGuideOptId: null, // null = follows currently selected option at bedGuideStopId
-    picks: { 1: '1A', 2: '2A_BF', 3: '3A', 4: '4A', 7: '7B' },
+    picks: { 1: '1A', 2: '2A_BF', 3: '3A', 4: '4A', 7: '7A' },
     openMathDrawers: {},
     openGuideDrawers: {},
-    importWarning: null, // { summary, unmatchedStops: [{ stopId, hotelName }] }
   };
 
+  let pendingExternalState = null;
   let toastTimer = null;
   let initialized = false;
 
@@ -1792,6 +1792,12 @@
         if (PRESETS[0].stop7Meal) state.stop7Meal = PRESETS[0].stop7Meal;
       }
 
+      if (pendingExternalState) {
+        const buffered = pendingExternalState;
+        pendingExternalState = null;
+        applyStateInternal(buffered);
+      }
+
       loadingEl.classList.add('hidden');
       if (state.activeView === 'picker') {
         pickerView.classList.remove('hidden');
@@ -2431,52 +2437,6 @@
   // ===================================================================
   // PICKER RENDERING FUNCTIONS
   // ===================================================================
-  function renderImportWarningBanner() {
-    const banner = document.getElementById('import-warning-banner');
-    if (!banner) return;
-    if (!state.importWarning || !state.importWarning.unmatchedStops.length) {
-      banner.classList.add('hidden');
-      banner.innerHTML = '';
-      return;
-    }
-
-    const skippedList = state.importWarning.unmatchedStops
-      .map((item) => `<strong>Stop ${item.stopId}</strong> (${escapeHtml(item.hotelName)})`)
-      .join(', ');
-    const firstStopId = state.importWarning.unmatchedStops[0].stopId;
-
-    banner.classList.remove('hidden');
-    banner.innerHTML = `
-      <div class="space-y-0.5 min-w-0">
-        <div class="font-semibold text-amberWarm">Shared picks loaded — ${state.importWarning.unmatchedStops.length === 1 ? '1 retired hotel was skipped' : `${state.importWarning.unmatchedStops.length} retired hotels were skipped`}</div>
-        <p class="text-inkSoft leading-relaxed">
-          ${skippedList} ${state.importWarning.unmatchedStops.length === 1 ? 'is no longer on the current shortlist, so your existing pick there was kept unchanged.' : 'are no longer on the current shortlist, so your existing picks there were kept unchanged.'} Please choose a current option below.
-        </p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button type="button" id="import-warn-jump-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-paper text-ink border border-amberWarm-border transition-colors cursor-pointer whitespace-nowrap">
-          Jump to Stop ${firstStopId} ↓
-        </button>
-        <button type="button" id="import-warn-dismiss-btn" class="w-7 h-7 rounded-full hover:bg-white/80 text-inkSoft hover:text-ink flex items-center justify-center cursor-pointer" aria-label="Dismiss notice">✕</button>
-      </div>
-    `;
-
-    const jumpBtn = document.getElementById('import-warn-jump-btn');
-    if (jumpBtn) {
-      jumpBtn.addEventListener('click', () => {
-        const target = document.getElementById(`stop-card-${firstStopId}`);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    }
-    const dismissBtn = document.getElementById('import-warn-dismiss-btn');
-    if (dismissBtn) {
-      dismissBtn.addEventListener('click', () => {
-        state.importWarning = null;
-        renderImportWarningBanner();
-      });
-    }
-  }
-
   function renderModeAndFx() {
     ['M1', 'M2'].forEach((m) => {
       const btn = document.getElementById(`mode-btn-${m}`);
@@ -2587,7 +2547,6 @@
         if (preset.stop7Beds) state.stop7Beds = preset.stop7Beds;
         if (preset.stop7Meal) state.stop7Meal = preset.stop7Meal;
         if (state.mode === 'M2') state.picks[1] = '1A';
-        state.importWarning = null;
         renderAll(true);
         showToast(`Applied "${preset.name}" preset`);
       });
@@ -2969,11 +2928,6 @@
         const optId = card.dataset.optId;
         if (state.picks[stopId] !== optId) {
           state.picks[stopId] = optId;
-          // Clear any retired-stop warning once the user picks a new option at that stop
-          if (state.importWarning && state.importWarning.unmatchedStops.some((u) => u.stopId === stopId)) {
-            state.importWarning.unmatchedStops = state.importWarning.unmatchedStops.filter((u) => u.stopId !== stopId);
-            if (state.importWarning.unmatchedStops.length === 0) state.importWarning = null;
-          }
           renderAll(true);
         }
       };
@@ -3184,7 +3138,6 @@
 
   function renderAll(animate = false) {
     if (!state.dataLoaded) return;
-    renderImportWarningBanner();
     renderModeAndFx();
     renderPresets();
     renderStops();
@@ -3201,7 +3154,7 @@
   }
 
   // ===================================================================
-  // TOAST, CLIPBOARD, EXPORT & PASTE-TO-LOAD SHARED PICKS
+  // TOAST, CLIPBOARD, EXPORT & JSON STATE SYNC API
   // ===================================================================
   function showToast(message, durationMs = 2800) {
     const toast = document.getElementById('toast');
@@ -3281,199 +3234,6 @@
     return lines.join('\n');
   }
 
-  /**
-   * Extracts the human-readable hotel name from a shared summary line like:
-   * "Stop 7 · Tokyo (Ueno / Asakusa) (Oct 28–31, 3N): [7B] Super Hotel Ueno-Okachimachi — S$393/sib [Free Breakfast]"
-   */
-  function extractHotelNameFromStopLine(line) {
-    const colonIdx = line.indexOf(':');
-    if (colonIdx === -1) return line.trim();
-    const afterColon = line.slice(colonIdx + 1).trim();
-    return afterColon
-      .replace(/^\[[^\]]+\]\s*/, '')
-      .replace(/\s*[—–-]\s*S\$\d[\d,]*.*$/i, '')
-      .replace(/\s*\[[^\]]+\]\s*$/, '')
-      .trim() || afterColon;
-  }
-
-  /**
-   * Parses a pasted share text blob and returns detected mode, FX rate, Stop 7 toggles,
-   * matched stops, and any retired/unmatched stops (left unchanged rather than silently remapped).
-   */
-  function parseSharedPicksText(rawText) {
-    const text = String(rawText || '').trim();
-    if (!text) return { ok: false, reason: 'Please paste a shared summary first.' };
-
-    let detectedMode = null;
-    if (/mode\s*2|all\s*3\+2|always\s*shares/i.test(text)) detectedMode = 'M2';
-    else if (/mode\s*1|hybrid/i.test(text)) detectedMode = 'M1';
-
-    let detectedFx = null;
-    const fxMatch = text.match(/1\s*SGD\s*=\s*[¥￥]?\s*(\d+(?:\.\d+)?)/i);
-    if (fxMatch) {
-      const parsedFx = parseFloat(fxMatch[1]);
-      if (!isNaN(parsedFx) && parsedFx >= 60 && parsedFx <= 220) detectedFx = parsedFx;
-    }
-
-    let detectedStop7Beds = null;
-    let detectedStop7Meal = null;
-    const tokyoSetupMatch = text.match(/tokyo\s*setup\s*:\s*([^\r\n]+)/i);
-    if (tokyoSetupMatch) {
-      const setupLine = tokyoSetupMatch[1];
-      if (/double/i.test(setupLine)) detectedStop7Beds = 'double';
-      else if (/twin|separate\s*beds/i.test(setupLine)) detectedStop7Beds = 'twin';
-      if (/breakfast|\bbf\b/i.test(setupLine)) detectedStop7Meal = 'bf';
-      else if (/room\s*only|\bro\b/i.test(setupLine)) detectedStop7Meal = 'ro';
-    }
-
-    let matchedPreset = null;
-    if (/smart\s*value/i.test(text) && PRESETS[1]) matchedPreset = PRESETS[1];
-    else if (/budget[\s-]*friendly/i.test(text) && PRESETS[2]) matchedPreset = PRESETS[2];
-    else if (/comfort\s*baseline/i.test(text) && PRESETS[0]) matchedPreset = PRESETS[0];
-    const basePicks = matchedPreset ? { ...matchedPreset.picks } : {};
-
-    const detectedPicks = {};
-    const presentDecisionStops = new Set();
-    const unmatchedStops = [];
-    const lines = text.split(/\r?\n/);
-
-    // Helper: finds an option in `stop.options` whose name/shortName matches `regex` (no blind fallback ID)
-    function findOptionStrictly(stop, regex) {
-      const found = stop.options.find((o) => regex.test(o.name) || regex.test(o.shortName || ''));
-      return found ? found.id : null;
-    }
-
-    // Detects retired Tokyo hotels (e.g. Ueno / Okachimachi / Asakusa) that no longer exist in Stop 7
-    function isRetiredTokyoHotelLine(stop, line) {
-      const retiredChecks = [
-        /okachimachi/i,
-        /mitsui\s*garden.*ueno|\bueno\b/i,
-        /dormy\s*inn.*asakusa|\basakusa\b/i,
-      ];
-      return retiredChecks.some((rx) => rx.test(line) && !findOptionStrictly(stop, rx));
-    }
-
-    function matchOptionForStop(stop, line) {
-      const lower = line.toLowerCase();
-
-      // 1. Exact hotel name / shortName match against current options
-      for (const opt of stop.options) {
-        if (lower.includes(opt.name.toLowerCase()) || (opt.shortName && lower.includes(opt.shortName.toLowerCase()))) {
-          return opt.id;
-        }
-      }
-
-      // 2. For Stop 7, refuse to remap retired Ueno / Okachimachi / Asakusa hotels to new Ginza slots
-      if (stop.id === 7 && isRetiredTokyoHotelLine(stop, line)) {
-        return null;
-      }
-
-      // 3. Stop-specific hotel name matching (strictly against current options)
-      if (stop.id === 1) {
-        if (/solo/i.test(line)) return findOptionStrictly(stop, /solo/i) || (stop.options.some((o) => o.id === '1B') ? '1B' : null);
-        if (/shared|3\+2|haneda/i.test(line)) return findOptionStrictly(stop, /shared|3\+2/i) || (stop.options.some((o) => o.id === '1A') ? '1A' : null);
-      } else if (stop.id === 2) {
-        const isRo = /room\s*only|\(ro\)/i.test(line);
-        if (/natulux/i.test(line)) return isRo ? '2B_RO' : '2B_BF';
-        if (/la\s*vista/i.test(line)) return isRo ? '2A_RO' : '2A_BF';
-      } else if (stop.id === 3) {
-        if (/tamanoyu/i.test(line)) return /wagyu/i.test(line) ? '3B_WAGYU' : '3B_STD';
-        if (/takinoya/i.test(line)) return '3A';
-      } else if (stop.id === 4) {
-        if (/spa\s*resort|36\.8|spa\s*\(/i.test(line)) return '4B';
-        if (/club|56\s*m|nonokaze/i.test(line)) return '4A';
-      } else if (stop.id === 7) {
-        if (/gracery/i.test(line)) return findOptionStrictly(stop, /gracery/i);
-        if (/super\s*hotel/i.test(line)) return findOptionStrictly(stop, /super\s*hotel/i);
-        if (/sotetsu|fresa/i.test(line)) return findOptionStrictly(stop, /sotetsu|fresa/i);
-        if (/remm\s*.*kyobashi|\bkyobashi\b/i.test(line)) return findOptionStrictly(stop, /kyobashi/i);
-        if (/remm\s*.*hibiya|\bhibiya\b/i.test(line)) return findOptionStrictly(stop, /hibiya/i);
-        if (/mitsui/i.test(line)) return findOptionStrictly(stop, /mitsui/i);
-        if (/dormy/i.test(line)) return findOptionStrictly(stop, /dormy/i);
-      }
-
-      // 4. Explicit bracketed option ID match (e.g. [7B]) only if no conflicting retired name was detected
-      for (const opt of stop.options) {
-        const escapedId = opt.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const idRegex = new RegExp(`(?:\\[|\\b)${escapedId}(?:\\]|\\b)`, 'i');
-        if (idRegex.test(line)) return opt.id;
-      }
-
-      return null;
-    }
-
-    const decisionStopIds = [1, 2, 3, 4, 7];
-    lines.forEach((line, idx) => {
-      const stopMatch = line.match(/stop\s*([1-7])\b/i);
-      if (!stopMatch) return;
-      const stopId = Number(stopMatch[1]);
-      if (!decisionStopIds.includes(stopId)) return;
-      const stop = STOPS.find((s) => s.id === stopId);
-      if (!stop) return;
-
-      presentDecisionStops.add(stopId);
-      const matchedId = matchOptionForStop(stop, line);
-
-      if (matchedId) {
-        detectedPicks[stopId] = matchedId;
-        // Infer Stop 7 bed/meal setup ONLY when Stop 7 actually matched a current hotel
-        if (stopId === 7) {
-          const nextLine = lines[idx + 1] && /rooms\s*:/i.test(lines[idx + 1]) ? lines[idx + 1] : '';
-          const combined = `${line} ${nextLine}`;
-          if (!detectedStop7Meal) {
-            if (/breakfast|\bbf\b/i.test(line)) detectedStop7Meal = 'bf';
-            else if (/room\s*only|\bro\b/i.test(line)) detectedStop7Meal = 'ro';
-          }
-          if (!detectedStop7Beds) {
-            if (/shared\s*double|brothers[^·\n]*double/i.test(combined)) detectedStop7Beds = 'double';
-            else if (/twin|2\s*separate\s*beds/i.test(combined)) detectedStop7Beds = 'twin';
-          }
-        }
-      } else {
-        unmatchedStops.push({
-          stopId,
-          city: stop.city,
-          hotelName: extractHotelNameFromStopLine(line),
-        });
-      }
-    });
-
-    const matchedStopCount = Object.keys(detectedPicks).length;
-    const hasPresetOnly = presentDecisionStops.size === 0 && Object.keys(basePicks).length > 0;
-    if (matchedStopCount === 0 && unmatchedStops.length === 0 && !detectedMode && !detectedFx && !hasPresetOnly && !detectedStop7Beds && !detectedStop7Meal) {
-      return {
-        ok: false,
-        reason: 'Could not recognize any Hokkaido + Tokyo 2027 picks in that text. Paste the full summary generated by "Share Selection" or "Copy Text".',
-      };
-    }
-
-    const finalMode = detectedMode || state.mode;
-    const stop7WasUnmatched = unmatchedStops.some((u) => u.stopId === 7);
-    const finalStop7Beds = stop7WasUnmatched ? null : (detectedStop7Beds || (hasPresetOnly && matchedPreset && matchedPreset.stop7Beds) || null);
-    const finalStop7Meal = stop7WasUnmatched ? null : (detectedStop7Meal || (hasPresetOnly && matchedPreset && matchedPreset.stop7Meal) || null);
-
-    const mergedPicks = { ...state.picks };
-    // Apply preset baseline ONLY if the pasted text had no stop-by-stop lines (preset-only snippet)
-    if (hasPresetOnly) {
-      Object.keys(basePicks).forEach((k) => { mergedPicks[Number(k)] = basePicks[k]; });
-    }
-    // Apply all explicitly matched stops (unmatched/retired stops remain untouched)
-    Object.keys(detectedPicks).forEach((k) => { mergedPicks[Number(k)] = detectedPicks[k]; });
-    if (finalMode === 'M2') mergedPicks[1] = '1A';
-
-    return {
-      ok: true,
-      mode: finalMode,
-      fxRate: detectedFx,
-      stop7Beds: finalStop7Beds,
-      stop7Meal: finalStop7Meal,
-      picks: mergedPicks,
-      matchedStopCount,
-      unmatchedStops,
-      usedPresetFallback: hasPresetOnly,
-    };
-  }
-
   function openExportModal() {
     document.getElementById('export-textarea').value = buildExportText();
     document.getElementById('export-modal').classList.remove('hidden');
@@ -3483,57 +3243,148 @@
     document.getElementById('export-modal').classList.add('hidden');
   }
 
-  function openImportModal() {
-    const feedback = document.getElementById('import-feedback');
-    feedback.classList.add('hidden');
-    feedback.textContent = '';
-    document.getElementById('import-modal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('import-textarea').focus(), 40);
-  }
+  /**
+   * Returns a plain, JSON-serializable deep-cloned snapshot of the current picker state
+   * (rooming mode, FX rate, Stop 7 toggles, and every stop's selected option & meal choices).
+   */
+  function getState() {
+    const picksCopy = {};
+    const stopsSnapshot = {};
 
-  function closeImportModal() {
-    document.getElementById('import-modal').classList.add('hidden');
-  }
-
-  function handleApplyImport() {
-    const raw = document.getElementById('import-textarea').value;
-    const feedback = document.getElementById('import-feedback');
-    const res = parseSharedPicksText(raw);
-
-    if (!res.ok) {
-      feedback.className = 'p-3 rounded-xl text-xs leading-relaxed bg-amberWarm-light text-amberWarm border border-amberWarm-border';
-      feedback.textContent = res.reason;
-      feedback.classList.remove('hidden');
-      return;
-    }
-
-    state.mode = res.mode;
-    if (res.fxRate !== null) state.fxRate = res.fxRate;
-    if (res.stop7Beds) state.stop7Beds = res.stop7Beds;
-    if (res.stop7Meal) state.stop7Meal = res.stop7Meal;
-    state.picks = res.picks;
-    state.importWarning = res.unmatchedStops.length > 0 ? { unmatchedStops: res.unmatchedStops } : null;
-
-    setActiveView('picker');
-    renderAll(true);
-    closeImportModal();
-
-    const parts = [res.mode === 'M1' ? 'Mode 1 (Hybrid)' : 'Mode 2 (All 3+2)'];
-    if (res.stop7Beds || res.stop7Meal) {
-      const bTxt = state.stop7Beds === 'double' ? 'Double' : 'Twin';
-      const mTxt = state.stop7Meal === 'bf' ? 'BF' : 'RO';
-      parts.push(`Tokyo ${bTxt}/${mTxt}`);
-    }
-    if (res.fxRate !== null) parts.push(`¥${formatFx(res.fxRate)}`);
-    if (res.matchedStopCount > 0) parts.push(`${res.matchedStopCount} stops loaded`);
-    else if (res.usedPresetFallback) parts.push('preset applied');
-
-    if (res.unmatchedStops.length > 0) {
-      const skipped = res.unmatchedStops.map((u) => `Stop ${u.stopId}`).join(', ');
-      showToast(`Loaded ${parts.join(' · ')} — skipped retired hotel at ${skipped}`, 4500);
+    if (state.dataLoaded && STOPS.length > 0) {
+      STOPS.forEach((stop) => {
+        const opt = getSelectedOptionForStop(stop, state.mode);
+        const optId = opt ? opt.id : (state.picks[stop.id] || stop.baselineOptionId || null);
+        picksCopy[String(stop.id)] = optId;
+        const entry = {
+          optionId: optId,
+          hotel: opt ? opt.name : null,
+          mealTag: opt ? opt.mealTag : null,
+        };
+        if (stop.hasStopConfigurator) {
+          entry.beds = state.stop7Beds;
+          entry.meal = state.stop7Meal;
+        }
+        stopsSnapshot[String(stop.id)] = entry;
+      });
     } else {
-      showToast(`Applied shared picks: ${parts.join(' · ')}`);
+      Object.keys(state.picks).forEach((k) => {
+        picksCopy[String(k)] = state.picks[k];
+      });
     }
+
+    return JSON.parse(JSON.stringify({
+      mode: state.mode,
+      fxRate: Number(state.fxRate),
+      stop7Beds: state.stop7Beds,
+      stop7Meal: state.stop7Meal,
+      picks: picksCopy,
+      stops: stopsSnapshot,
+    }));
+  }
+
+  /**
+   * Internal validator/applier used both by applyState() and loadTripData() (if buffered pre-load).
+   * Safely ignores unknown/retired option IDs (falling back to that stop's default).
+   */
+  function applyStateInternal(inputState) {
+    if (!inputState || typeof inputState !== 'object') return false;
+
+    // 1. Rooming mode (M1 / M2)
+    if (typeof inputState.mode === 'string') {
+      const m = inputState.mode.trim().toUpperCase();
+      if (m === 'M1' || m === 'M2') state.mode = m;
+    }
+
+    // 2. FX rate (validated within [60, 220])
+    if (inputState.fxRate !== undefined && inputState.fxRate !== null && inputState.fxRate !== '') {
+      const parsedFx = Number(inputState.fxRate);
+      if (Number.isFinite(parsedFx) && parsedFx >= 60 && parsedFx <= 220) {
+        state.fxRate = parsedFx;
+      }
+    }
+
+    // 3. Stop 7 configurator toggles (beds: twin/double, meal: ro/bf)
+    const stop7Data = STOPS.find((s) => s.id === 7);
+    const defaultStop7Beds = (stop7Data && stop7Data.defaultVariant && stop7Data.defaultVariant.beds)
+      || (PRESETS[0] && PRESETS[0].stop7Beds)
+      || 'twin';
+    const defaultStop7Meal = (stop7Data && stop7Data.defaultVariant && stop7Data.defaultVariant.meal)
+      || (PRESETS[0] && PRESETS[0].stop7Meal)
+      || 'ro';
+
+    const stop7Entry = inputState.stops && (inputState.stops['7'] || inputState.stops[7]);
+    const rawBeds = inputState.stop7Beds !== undefined ? inputState.stop7Beds : (stop7Entry && stop7Entry.beds);
+    const rawMeal = inputState.stop7Meal !== undefined ? inputState.stop7Meal : (stop7Entry && stop7Entry.meal);
+
+    if (rawBeds !== undefined) {
+      const b = String(rawBeds || '').trim().toLowerCase();
+      state.stop7Beds = (b === 'twin' || b === 'double') ? b : defaultStop7Beds;
+    }
+    if (rawMeal !== undefined) {
+      const ml = String(rawMeal || '').trim().toLowerCase();
+      state.stop7Meal = (ml === 'ro' || ml === 'bf') ? ml : defaultStop7Meal;
+    }
+
+    // 4. Per-stop option selections (validate against current STOPS; fall back to stop default if retired/unknown)
+    const inputPicks = inputState.picks && typeof inputState.picks === 'object' ? inputState.picks : null;
+    const inputStops = inputState.stops && typeof inputState.stops === 'object' ? inputState.stops : null;
+    const nextPicks = {};
+
+    STOPS.forEach((stop) => {
+      const sKey = String(stop.id);
+      const defaultOptId = (PRESETS[0] && PRESETS[0].picks && PRESETS[0].picks[sKey])
+        || stop.baselineOptionId
+        || (stop.options[0] && stop.options[0].id);
+
+      if (isStopLockedForMode(stop, state.mode)) {
+        nextPicks[stop.id] = (stop.options[0] && stop.options[0].id) || defaultOptId;
+        return;
+      }
+
+      let requestedId = null;
+      if (inputPicks && (sKey in inputPicks || stop.id in inputPicks)) {
+        requestedId = inputPicks[sKey] !== undefined ? inputPicks[sKey] : inputPicks[stop.id];
+      } else if (inputStops && (sKey in inputStops || stop.id in inputStops)) {
+        const stObj = inputStops[sKey] !== undefined ? inputStops[sKey] : inputStops[stop.id];
+        if (stObj && typeof stObj === 'object') requestedId = stObj.optionId;
+      }
+
+      const matched = typeof requestedId === 'string'
+        ? stop.options.find((o) => o.id === requestedId && !(state.mode === 'M2' && o.hideInMode2))
+        : null;
+
+      nextPicks[stop.id] = matched ? matched.id : defaultOptId;
+    });
+
+    state.picks = nextPicks;
+    if (state.mode === 'M2') state.picks[1] = '1A';
+
+    // Sync FX input element directly so it updates immediately even if focused
+    const fxInput = document.getElementById('fx-input');
+    if (fxInput) fxInput.value = formatFx(state.fxRate);
+
+    return true;
+  }
+
+  /**
+   * Public API: Validates and applies a JSON state snapshot (e.g. from getState() / Google Sheets sync)
+   * and triggers a full UI re-render. Buffers safely if called before trip_data_2027.json finishes loading.
+   */
+  function applyState(nextState) {
+    if (!nextState || typeof nextState !== 'object') return false;
+    const cloned = JSON.parse(JSON.stringify(nextState));
+
+    if (!state.dataLoaded || STOPS.length === 0) {
+      pendingExternalState = cloned;
+      return true;
+    }
+
+    const applied = applyStateInternal(cloned);
+    if (applied) {
+      renderAll(true);
+    }
+    return applied ? getState() : false;
   }
 
   async function triggerNativeShare() {
@@ -3591,17 +3442,19 @@
     });
 
     const fxInput = document.getElementById('fx-input');
-    fxInput.addEventListener('input', () => {
-      const val = parseFloat(fxInput.value);
-      if (!isNaN(val) && val >= 60 && val <= 220) {
-        state.fxRate = val;
-        renderAll(false);
-      }
-    });
-    fxInput.addEventListener('blur', () => {
-      const val = parseFloat(fxInput.value);
-      if (isNaN(val) || val < 60 || val > 220) fxInput.value = formatFx(state.fxRate);
-    });
+    if (fxInput) {
+      fxInput.addEventListener('input', () => {
+        const val = parseFloat(fxInput.value);
+        if (!isNaN(val) && val >= 60 && val <= 220) {
+          state.fxRate = val;
+          renderAll(false);
+        }
+      });
+      fxInput.addEventListener('blur', () => {
+        const val = parseFloat(fxInput.value);
+        if (isNaN(val) || val < 60 || val > 220) fxInput.value = formatFx(state.fxRate);
+      });
+    }
     document.querySelectorAll('.fx-preset-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.fxRate = parseFloat(btn.dataset.fx);
@@ -3645,10 +3498,6 @@
     });
     document.getElementById('btn-open-export-modal').addEventListener('click', openExportModal);
 
-    document.getElementById('open-import-modal-btn').addEventListener('click', openImportModal);
-    document.getElementById('rail-import-btn').addEventListener('click', openImportModal);
-    document.getElementById('btn-open-import-modal').addEventListener('click', openImportModal);
-
     document.getElementById('rail-share-btn').addEventListener('click', triggerNativeShare);
     document.getElementById('rail-copy-btn').addEventListener('click', () => {
       const ok = copyTextToClipboard(buildExportText());
@@ -3669,20 +3518,9 @@
     });
     document.getElementById('modal-download-btn').addEventListener('click', downloadSummaryTxt);
 
-    document.getElementById('close-import-modal').addEventListener('click', closeImportModal);
-    document.getElementById('import-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'import-modal') closeImportModal();
-    });
-    document.getElementById('import-clear-btn').addEventListener('click', () => {
-      document.getElementById('import-textarea').value = '';
-      document.getElementById('import-feedback').classList.add('hidden');
-    });
-    document.getElementById('import-apply-btn').addEventListener('click', handleApplyImport);
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeExportModal();
-        closeImportModal();
         closeMapModal();
         closeBedGuideModal();
       }
@@ -3719,5 +3557,5 @@
     loadTripData();
   }
 
-  global.HokkaidoPickerModule = { init };
+  global.HokkaidoPickerModule = { init, getState, applyState };
 })(window);
