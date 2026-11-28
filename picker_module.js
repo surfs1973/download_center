@@ -554,30 +554,57 @@
       };
     }
 
-    // 7C Ginza: Sotetsu Fresa Inn Ginza-Sanchome (2+2+1 Only)
+    // 7C Ginza: Sotetsu Fresa Inn Ginza-Sanchome (M1: 2+2+1 Solo; M2: Connecting 3+2)
     if (/sotetsu|fresa/i.test(hay)) {
       const broArea = extractM2FromText(broPart, isDoubleBros ? 15.3 : 18.6);
       const broW = extractCmFromText(broPart, isDoubleBros ? 140 : 120);
       const sisArea = extractM2FromText(sisPart, 12);
       const sisW = extractCmFromText(sisPart, 140);
+      const brosObj = {
+        label: isDoubleBros
+          ? `Brothers’ Room (${broArea} m² Comfort Double)`
+          : `Brothers’ Room (${broArea} m² Superior Twin)`,
+        areaM2: broArea,
+        suitcases: 2,
+        beds: isDoubleBros
+          ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Serta Double' }]
+          : [
+              { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Serta Wide Twin' },
+              { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Serta Wide Twin' },
+            ],
+        note: isDoubleBros
+          ? `Compact ${broArea} m² Tokyo room + ${broW} cm Serta double bed (12 cm < SG Queen) — open 1 suitcase at a time.`
+          : `Generous 2× ${broW} cm Serta twin beds (wider than SG Super Single each), though ${broArea} m² stays tidy for 2 large suitcases.`,
+      };
+
+      if (mode === 'M2') {
+        return {
+          isSolo: true,
+          isConnecting: true,
+          brothers: brosObj,
+          sisterSolo: {
+            label: 'Sister’s Adjoining Room (15.3 m² inside 33.9 m² Connecting)',
+            areaM2: 15.3,
+            suitcases: 1,
+            beds: [{ widthCm: 140, sleepers: 1, occupant: 'Sister', type: 'Serta Double (Own Adjoining Room)' }],
+            note: 'Connecting room setup (18.6 m² + 15.3 m² with internal door) gives Sister her own bedroom & bath while staying connected to Parents.',
+          },
+          parents: {
+            label: 'Parents’ Adjoining Room (18.6 m² inside 33.9 m² Connecting)',
+            areaM2: 18.6,
+            suitcases: 2,
+            beds: [
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 1', type: 'Serta Wide Twin' },
+              { widthCm: 120, sleepers: 1, occupant: 'Parent 2', type: 'Serta Wide Twin' },
+            ],
+            note: 'Parents take the adjoining 18.6 m² twin side connected directly to Sister’s room via internal door.',
+          },
+        };
+      }
+
       return {
         isSolo: true,
-        brothers: {
-          label: isDoubleBros
-            ? `Brothers’ Room (${broArea} m² Comfort Double)`
-            : `Brothers’ Room (${broArea} m² Superior Twin)`,
-          areaM2: broArea,
-          suitcases: 2,
-          beds: isDoubleBros
-            ? [{ widthCm: broW, sleepers: 2, occupant: '2 Brothers', type: 'Shared Serta Double' }]
-            : [
-                { widthCm: broW, sleepers: 1, occupant: 'Bro 1', type: 'Serta Wide Twin' },
-                { widthCm: broW, sleepers: 1, occupant: 'Bro 2', type: 'Serta Wide Twin' },
-              ],
-          note: isDoubleBros
-            ? `Compact ${broArea} m² Tokyo room + ${broW} cm Serta double bed (12 cm < SG Queen) — open 1 suitcase at a time.`
-            : `Generous 2× ${broW} cm Serta twin beds (wider than SG Super Single each), though ${broArea} m² stays tidy for 2 large suitcases.`,
-        },
+        brothers: brosObj,
         sisterSolo: {
           label: `Sister’s Solo Room (${sisArea} m² Standard Single)`,
           areaM2: sisArea,
@@ -1128,17 +1155,16 @@
 
     const stop = STOPS.find((s) => s.id === state.bedGuideStopId) || STOPS[STOPS.length - 1];
     const lockedNow = isStopLockedForMode(stop, state.mode);
-    const visibleOptions = lockedNow
-      ? [stop.options[0]]
-      : (stop.id === 7 ? stop.options : stop.options.filter((o) => !(state.mode === 'M2' && o.hideInMode2)));
+    const visibleOptions = getVisibleOptionsForStop(stop, state.mode);
 
+    const pickedOpt = getSelectedOptionForStop(stop, state.mode);
     const currentOptId = state.bedGuideOptId && visibleOptions.some((o) => o.id === state.bedGuideOptId)
       ? state.bedGuideOptId
-      : (lockedNow ? stop.options[0].id : (state.picks[stop.id] || stop.baselineOptionId));
+      : pickedOpt.id;
     const rawOpt = getOption(stop, currentOptId);
     const opt = resolveOptionData(stop, rawOpt);
     const specs = getBedSpecsForOption(stop, opt, state.mode);
-    const isPickedAtStop = lockedNow || state.picks[stop.id] === opt.id;
+    const isPickedAtStop = lockedNow || pickedOpt.id === opt.id;
 
     // 1. Controls bar: Stop pills + Option pills + Stop 7 Twin/Double toggle
     const controlsEl = document.getElementById('bed-guide-controls');
@@ -1655,7 +1681,7 @@
 
   function getStop7BedSavingsHint(stop) {
     const diffs = [];
-    (stop.options || []).forEach((rawOpt) => {
+    getVisibleOptionsForStop(stop, state.mode).forEach((rawOpt) => {
       if (!rawOpt.variants) return;
       const tw = rawOpt.variants[`twin_${state.stop7Meal}`];
       const db = rawOpt.variants[`double_${state.stop7Meal}`];
@@ -1679,6 +1705,123 @@
     return Boolean(stop && (stop.locked || (Array.isArray(stop.lockedModes) && stop.lockedModes.includes(mode))));
   }
 
+  /**
+   * Distinguishes connecting-room options (where Parents + Sister have internal
+   * connecting rooms, e.g. Super Hotel Premier Ginza & Sotetsu Fresa Inn Ginza-Sanchome)
+   * from pure solo-only (2+2+1) hotels.
+   */
+  function isOptionConnecting(opt) {
+    if (!opt) return false;
+    if (opt.connectingRoom === true || opt.isConnecting === true) return true;
+    const id = String(opt.id || '');
+    if (id === '7B' || id === '7C') return true;
+    const name = String(opt.name || '');
+    if (/super\s*hotel|sotetsu\s*fresa/i.test(name)) return true;
+    const m2Badge = resolveField(opt.roomBadge, 'M2');
+    const m2Breakdown = resolveField(opt.roomBreakdown, 'M2');
+    return /connecting/i.test(`${m2Badge || ''} ${m2Breakdown || ''}`);
+  }
+
+  /**
+   * Returns true if an option ONLY supports a pure solo (non-connecting) room
+   * for Sister with no 3+2 triple and no connecting rooms (e.g. 1B Haneda Solo,
+   * 7D remm Kyobashi, 7E remm Hibiya).
+   */
+  function isOptionPureSoloOnly(opt) {
+    if (!opt) return false;
+    if (isOptionConnecting(opt)) return false;
+    if (opt.hideInMode2 === true || opt.only221 === true) return true;
+    if (opt.sisterSolo === true) return true;
+    if (opt.sisterSolo && typeof opt.sisterSolo === 'object' && Boolean(opt.sisterSolo.M2)) return true;
+    return false;
+  }
+
+  function isOptionAllowedInMode(opt, mode = state.mode) {
+    if (!opt) return false;
+    if (mode !== 'M2') return true;
+    return !isOptionPureSoloOnly(opt);
+  }
+
+  function getVisibleOptionsForStop(stop, mode = state.mode) {
+    if (!stop || !Array.isArray(stop.options) || stop.options.length === 0) return [];
+    if (isStopLockedForMode(stop, mode)) return [stop.options[0]];
+    const allowed = stop.options.filter((o) => isOptionAllowedInMode(o, mode));
+    return allowed.length > 0 ? allowed : [stop.options[0]];
+  }
+
+  function getDefaultOptionForStop(stop, mode = state.mode) {
+    if (!stop || !Array.isArray(stop.options) || stop.options.length === 0) return null;
+    if (isStopLockedForMode(stop, mode)) return stop.options[0];
+    const sKey = String(stop.id);
+    const presetDefaultId = PRESETS[0] && PRESETS[0].picks && PRESETS[0].picks[sKey];
+    const candidates = [presetDefaultId, stop.baselineOptionId];
+    for (let i = 0; i < candidates.length; i += 1) {
+      if (!candidates[i]) continue;
+      const found = stop.options.find((o) => o.id === candidates[i] && isOptionAllowedInMode(o, mode));
+      if (found) return found;
+    }
+    return getVisibleOptionsForStop(stop, mode)[0] || stop.options[0];
+  }
+
+  function getOptionRoomBadge(opt, mode = state.mode) {
+    if (!opt) return '';
+    if (mode === 'M2' && isOptionConnecting(opt)) return 'Connecting (3+2)';
+    return resolveField(opt.roomBadge, mode);
+  }
+
+  function getOptionRoomingLabel(opt, mode = state.mode) {
+    if (!opt) return '3+2';
+    if (mode === 'M2' && isOptionConnecting(opt)) return 'Connecting (3+2)';
+    return isOptionSolo(opt, mode) ? '2+2+1 (Solo)' : '3+2';
+  }
+
+  function isPresetAllowedInMode(preset, mode = state.mode) {
+    if (!preset || !preset.picks) return false;
+    if (mode !== 'M2') return true;
+    return Object.keys(preset.picks).every((stopId) => {
+      const stop = STOPS.find((s) => s.id === Number(stopId));
+      if (!stop || isStopLockedForMode(stop, mode)) return true;
+      const opt = stop.options.find((o) => o.id === preset.picks[stopId]);
+      return opt ? isOptionAllowedInMode(opt, mode) : true;
+    });
+  }
+
+  function enforceModeCompatibility(mode = state.mode) {
+    const switchedStops = [];
+    STOPS.forEach((stop) => {
+      const currentId = state.picks[stop.id] || stop.baselineOptionId;
+      const currentOpt = getOption(stop, currentId);
+      if (isStopLockedForMode(stop, mode)) {
+        const lockedOpt = stop.options[0];
+        if (lockedOpt && currentOpt && currentOpt.id !== lockedOpt.id) {
+          state.picks[stop.id] = lockedOpt.id;
+          if (!isOptionAllowedInMode(currentOpt, mode)) {
+            switchedStops.push({
+              stopId: stop.id,
+              city: stop.city.split(' ')[0],
+              fromName: currentOpt.shortName || currentOpt.name,
+              toName: lockedOpt.shortName || lockedOpt.name,
+            });
+          }
+        }
+        return;
+      }
+      if (currentOpt && !isOptionAllowedInMode(currentOpt, mode)) {
+        const fallbackOpt = getDefaultOptionForStop(stop, mode);
+        if (fallbackOpt) {
+          state.picks[stop.id] = fallbackOpt.id;
+          switchedStops.push({
+            stopId: stop.id,
+            city: stop.city.split(' ')[0],
+            fromName: currentOpt.shortName || currentOpt.name,
+            toName: fallbackOpt.shortName || fallbackOpt.name,
+          });
+        }
+      }
+    });
+    return switchedStops;
+  }
+
   function getOption(stop, optId) {
     return stop.options.find((o) => o.id === optId) || stop.options[0];
   }
@@ -1686,11 +1829,15 @@
   function getSelectedOptionForStop(stop, mode = state.mode, picks = state.picks, bedsOverride = state.stop7Beds, mealOverride = state.stop7Meal) {
     const lockedNow = isStopLockedForMode(stop, mode);
     const pickedId = lockedNow ? stop.options[0].id : (picks[stop.id] || stop.baselineOptionId);
-    return resolveOptionData(stop, getOption(stop, pickedId), bedsOverride, mealOverride);
+    const raw = getOption(stop, pickedId);
+    const validRaw = isOptionAllowedInMode(raw, mode) ? raw : getDefaultOptionForStop(stop, mode);
+    return resolveOptionData(stop, validRaw, bedsOverride, mealOverride);
   }
 
   function isOptionSolo(opt, mode = state.mode) {
     if (!opt || !opt.sisterSolo) return false;
+    // In Mode 2, pure-solo options are disallowed and connecting rooms do NOT count toward soloNights (always 0/16)
+    if (mode === 'M2') return false;
     if (typeof opt.sisterSolo === 'boolean') return opt.sisterSolo;
     return Boolean(opt.sisterSolo[mode]);
   }
@@ -1742,6 +1889,7 @@
 
   function getMatchingPreset() {
     return PRESETS.find((preset) => {
+      if (!isPresetAllowedInMode(preset, state.mode)) return false;
       if (preset.stop7Beds && preset.stop7Beds !== state.stop7Beds) return false;
       if (preset.stop7Meal && preset.stop7Meal !== state.stop7Meal) return false;
       return Object.keys(preset.picks).every((stopId) => {
@@ -1965,7 +2113,9 @@
     const footer = document.getElementById('svg-map-footer');
     if (!stage || !footer) return;
 
-    const hotels = stop7.options.map((rawOpt) => {
+    const visibleStop7 = getVisibleOptionsForStop(stop7, state.mode);
+    const pickedStop7 = getSelectedOptionForStop(stop7, state.mode);
+    const hotels = visibleStop7.map((rawOpt) => {
       const opt = resolveOptionData(stop7, rawOpt);
       const [lat, lng] = getTokyoHotelCoords(opt);
       return {
@@ -1973,7 +2123,7 @@
         lat,
         lng,
         sgd: jpyToSgd(getOptionJpy(opt, state.mode)),
-        isSelected: state.picks[7] === opt.id,
+        isSelected: pickedStop7.id === opt.id,
       };
     });
 
@@ -2333,7 +2483,8 @@
         </div>
       `;
 
-      selectorLabel.textContent = `Stop 7 · ${stop7.city} (${stop7.options.length} Options) · Tap to pin & select`;
+      const visibleStop7Options = getVisibleOptionsForStop(stop7, state.mode);
+      selectorLabel.textContent = `Stop 7 · ${stop7.city} (${visibleStop7Options.length} Options) · Tap to pin & select`;
 
       if (stop7.hasStopConfigurator) {
         quickConfigWrap.classList.remove('hidden');
@@ -2367,9 +2518,9 @@
         quickConfigWrap.classList.add('hidden');
       }
 
-      cardsWrap.innerHTML = stop7.options.map((rawOpt) => {
+      cardsWrap.innerHTML = visibleStop7Options.map((rawOpt) => {
         const opt = resolveOptionData(stop7, rawOpt);
-        const isSelected = state.picks[7] === opt.id;
+        const isSelected = pickedOpt.id === opt.id;
         const sgd = jpyToSgd(getOptionJpy(opt, state.mode));
         return `
           <button type="button" data-tokyo-opt="${opt.id}" class="map-tokyo-card w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-pine-light/85 border-pine ring-1 ring-pine/30' : 'bg-white border-stoneLine hover:border-inkMuted'}">
@@ -2522,7 +2673,12 @@
     const activePreset = getMatchingPreset();
     document.getElementById('custom-mix-badge').classList.toggle('hidden', Boolean(activePreset));
 
-    container.innerHTML = PRESETS.map((preset) => {
+    const visiblePresets = PRESETS.filter((preset) => isPresetAllowedInMode(preset, state.mode));
+    container.className = visiblePresets.length === 2
+      ? 'grid grid-cols-1 md:grid-cols-2 gap-3.5'
+      : 'grid grid-cols-1 md:grid-cols-3 gap-3.5';
+
+    container.innerHTML = visiblePresets.map((preset) => {
       const pBeds = preset.stop7Beds || state.stop7Beds;
       const pMeal = preset.stop7Meal || state.stop7Meal;
       const totals = computeTotalsForPicks(preset.picks, state.mode, state.fxRate, pBeds, pMeal);
@@ -2548,13 +2704,13 @@
     container.querySelectorAll('.preset-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const preset = PRESETS.find((p) => p.id === btn.dataset.presetId);
-        if (!preset) return;
+        if (!preset || !isPresetAllowedInMode(preset, state.mode)) return;
         const nextPicks = {};
         Object.keys(preset.picks).forEach((k) => { nextPicks[Number(k)] = preset.picks[k]; });
         state.picks = nextPicks;
         if (preset.stop7Beds) state.stop7Beds = preset.stop7Beds;
         if (preset.stop7Meal) state.stop7Meal = preset.stop7Meal;
-        if (state.mode === 'M2') state.picks[1] = '1A';
+        enforceModeCompatibility(state.mode);
         renderAll(true);
         showToast(`Applied "${preset.name}" preset`);
       });
@@ -2565,7 +2721,17 @@
     const isOpen = Boolean(state.openGuideDrawers[stop.id]);
     const verdictText = resolveField(stop.guide.verdict, state.mode);
 
-    const hotelsHtml = stop.guide.hotels.map((h) => `
+    const visibleGuideHotels = (stop.guide.hotels || []).filter((h) => {
+      if (state.mode !== 'M2') return true;
+      const optMatch = String(h.name || '').match(/\(Option\s+([A-Za-z0-9_]+)\)/i);
+      if (optMatch) {
+        const matchedOpt = (stop.options || []).find((o) => o.id === optMatch[1]);
+        if (matchedOpt && !isOptionAllowedInMode(matchedOpt, 'M2')) return false;
+      }
+      return true;
+    });
+
+    const hotelsHtml = visibleGuideHotels.map((h) => `
       <div class="p-3.5 rounded-xl bg-white border border-stoneLine/80 space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h4 class="font-serif text-base font-semibold text-ink">${h.name}</h4>
@@ -2651,8 +2817,11 @@
       : specs.isSolo
         ? `Sister Solo: ${sisBed.widthCm} cm (${sisRoom.areaM2} m²)`
         : `Parents + Sister: ${sisBed.widthCm} cm ${sisBed.type} (${sisRoom.areaM2} m²)`;
+    const totalConnArea = specs.parents && specs.sisterSolo
+      ? Math.round((Number(specs.sisterSolo.areaM2) || 12) + (Number(specs.parents.areaM2) || 12))
+      : (sisRoom.areaM2 || 12) * 2;
     const sisSubnote = specs.isConnecting
-      ? `Adjoining room & bath inside ${(sisRoom.areaM2 || 12) * 2} m² Connecting Suite w/ Parents`
+      ? `Adjoining room & bath inside ${totalConnArea} m² Connecting Suite w/ Parents`
       : specs.isSolo
         ? 'Own solo room & private bathroom (no extra bed)'
         : '3-pax shared room · Parents take the 2 main beds';
@@ -2789,11 +2958,9 @@
         `;
       }
 
-      const visibleOptions = stop.id === 7
-        ? stop.options
-        : stop.options.filter((opt) => !(state.mode === 'M2' && opt.hideInMode2));
-      const pickedId = state.picks[stop.id] || stop.baselineOptionId;
-      const selectedOpt = resolveOptionData(stop, getOption(stop, pickedId));
+      const visibleOptions = getVisibleOptionsForStop(stop, state.mode);
+      const selectedOpt = getSelectedOptionForStop(stop, state.mode);
+      const pickedId = selectedOpt.id;
       const selectedSgd = jpyToSgd(getOptionJpy(selectedOpt, state.mode));
 
       const optionsHtml = visibleOptions.map((rawOpt) => {
@@ -2802,7 +2969,8 @@
         const sgd = jpyToSgd(getOptionJpy(opt, state.mode));
         const diffVsSelected = sgd - selectedSgd;
         const solo = isOptionSolo(opt, state.mode);
-        const badgeText = resolveField(opt.roomBadge, state.mode);
+        const isConnM2 = state.mode === 'M2' && isOptionConnecting(opt);
+        const badgeText = getOptionRoomBadge(opt, state.mode);
         const breakdownText = resolveField(opt.roomBreakdown, state.mode);
         const bullets = resolveField(opt.tradeOffs, state.mode) || [];
         const rawWarningBadge = opt.warningBadge ? resolveField(opt.warningBadge, state.mode) : '';
@@ -2810,9 +2978,6 @@
         const warningBadgeText = /\b(left|remaining|hurry|almost\s*gone|last\s*room)\b/i.test(rawWarningBadge)
           ? ''
           : rawWarningBadge;
-        const isMode2SoloOnly = stop.id === 7 && state.mode === 'M2' && (
-          Boolean(opt.only221) || (Boolean(stop.hasStopConfigurator) && (isOptionSolo(opt, 'M2') || ['7C', '7D', '7E'].includes(opt.id)))
-        );
 
         let deltaHtml = '';
         if (isSelected) {
@@ -2833,14 +2998,17 @@
           mealNetHint = `<div class="text-[10.5px] text-inkMuted mt-0.5">Net w/ meals budget: ${sign}${formatSgd(Math.abs(netDiff))}</div>`;
         }
 
+        const badgeClass = isConnM2
+          ? 'bg-pine-light text-pine border border-pine-border font-semibold'
+          : (solo ? 'bg-plum-light text-plum border border-plum-border' : 'bg-paper text-inkSoft border border-stoneLine');
+
         return `
           <div role="button" tabindex="0" data-stop-id="${stop.id}" data-opt-id="${opt.id}" class="option-card group rounded-2xl border-2 p-4 sm:p-5 transition-all cursor-pointer flex flex-col justify-between gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine ${isSelected ? 'border-pine bg-pine-light/45 shadow-[0_3px_14px_rgba(46,90,71,0.10)]' : 'border-stoneLine bg-white hover:border-inkMuted'}">
             <div>
               <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
                 <div class="flex flex-wrap items-center gap-1.5">
                   <span class="px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-sand text-inkSoft">${opt.id}</span>
-                  <span class="px-2 py-0.5 rounded-full text-[10.5px] font-medium ${solo ? 'bg-plum-light text-plum border border-plum-border' : 'bg-paper text-inkSoft border border-stoneLine'}">${badgeText}</span>
-                  ${isMode2SoloOnly && String(badgeText || '').toLowerCase() !== '2+2+1 only' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-plum-light text-plum border border-plum-border">2+2+1 Only</span>' : ''}
+                  <span class="px-2 py-0.5 rounded-full text-[10.5px] font-medium ${badgeClass}">${badgeText}</span>
                 </div>
                 ${deltaHtml}
               </div>
@@ -3015,6 +3183,7 @@
       const opt = getSelectedOptionForStop(stop, state.mode);
       const sgd = jpyToSgd(getOptionJpy(opt, state.mode));
       const solo = isOptionSolo(opt, state.mode);
+      const isConnM2 = state.mode === 'M2' && isOptionConnecting(opt);
       const breakdown = resolveField(opt.roomBreakdown, state.mode);
 
       return `
@@ -3025,7 +3194,7 @@
               <span>·</span>
               <span>${stop.dates} (${stop.nights}N)</span>
               ${lockedNow ? '<span class="px-1.5 py-0.5 rounded bg-sand text-inkSoft font-medium">Locked</span>' : ''}
-              ${solo ? '<span class="px-1.5 py-0.5 rounded bg-plum-light text-plum font-medium">Sister Solo</span>' : ''}
+              ${isConnM2 ? '<span class="px-1.5 py-0.5 rounded bg-pine-light text-pine font-medium">Connecting (3+2)</span>' : (solo ? '<span class="px-1.5 py-0.5 rounded bg-plum-light text-plum font-medium">Sister Solo</span>' : '')}
             </div>
             <div class="font-serif text-base sm:text-lg font-medium text-ink mt-0.5">${opt.name}</div>
             <div class="text-xs text-inkSoft mt-0.5">${breakdown}</div>
@@ -3084,6 +3253,7 @@
         const opt = getSelectedOptionForStop(stop, state.mode);
         const sgd = jpyToSgd(getOptionJpy(opt, state.mode));
         const solo = isOptionSolo(opt, state.mode);
+        const isConnM2 = state.mode === 'M2' && isOptionConnecting(opt);
         const shortCity = stop.city.split(' ')[0];
 
         return `
@@ -3094,7 +3264,7 @@
                 <div class="text-xs font-medium text-ink truncate">${opt.shortName}</div>
                 <div class="text-[10.5px] text-inkMuted flex items-center gap-1.5">
                   <span>${shortCity} · ${stop.nights}N</span>
-                  ${solo ? '<span class="inline-flex items-center gap-1 text-plum font-medium"><span class="w-1.5 h-1.5 rounded-full bg-plum"></span>Solo</span>' : ''}
+                  ${isConnM2 ? '<span class="inline-flex items-center gap-1 text-pine font-medium">Connecting (3+2)</span>' : (solo ? '<span class="inline-flex items-center gap-1 text-plum font-medium"><span class="w-1.5 h-1.5 rounded-full bg-plum"></span>Solo</span>' : '')}
                   ${lockedNow ? '<span class="text-pine">· Locked</span>' : ''}
                 </div>
               </div>
@@ -3378,7 +3548,8 @@
     const resolvedPicks = {};
     STOPS.forEach((stop) => {
       const sKey = String(stop.id);
-      const defaultOptId = (PRESETS[0] && PRESETS[0].picks && PRESETS[0].picks[sKey])
+      const defaultOpt = getDefaultOptionForStop(stop, resolvedMode);
+      const defaultOptId = (defaultOpt && defaultOpt.id)
         || stop.baselineOptionId
         || (stop.options[0] && stop.options[0].id);
 
@@ -3398,13 +3569,11 @@
       }
 
       const matched = typeof requestedId === 'string'
-        ? stop.options.find((o) => o.id === requestedId && !(resolvedMode === 'M2' && o.hideInMode2))
+        ? stop.options.find((o) => o.id === requestedId && isOptionAllowedInMode(o, resolvedMode))
         : null;
 
       resolvedPicks[stop.id] = matched ? matched.id : defaultOptId;
     });
-
-    if (resolvedMode === 'M2') resolvedPicks[1] = '1A';
 
     return {
       mode: resolvedMode,
@@ -3439,17 +3608,20 @@
 
     const evaluatedStops = STOPS.map((stop) => {
       const opt = getSelectedOptionForStop(stop, norm.mode, norm.picks, norm.stop7Beds, norm.stop7Meal);
-      const solo = isOptionSolo(opt, norm.mode);
+      const roomingLabel = getOptionRoomingLabel(opt, norm.mode);
+      const roomingKey = norm.mode === 'M2' && isOptionConnecting(opt)
+        ? 'connecting-3+2'
+        : (isOptionSolo(opt, norm.mode) ? 'solo' : '3+2');
       const stopJpy = getOptionJpy(opt, norm.mode);
       const perSiblingSgd = Math.round(stopJpy / norm.fx);
       const mealLabel = opt.mealTag || 'Room Only';
       const hotelId = String(opt.id || '').split('_')[0];
       const optionKey = stop.hasStopConfigurator
-        ? `${stop.id}|${opt.id}|${norm.stop7Beds}|${norm.stop7Meal}|${solo ? 'solo' : '3+2'}`
-        : `${stop.id}|${opt.id}|${solo ? 'solo' : '3+2'}|${mealLabel}`;
+        ? `${stop.id}|${opt.id}|${norm.stop7Beds}|${norm.stop7Meal}|${roomingKey}`
+        : `${stop.id}|${opt.id}|${roomingKey}|${mealLabel}`;
       const optionLabel = stop.hasStopConfigurator
         ? `${norm.stop7Beds === 'double' ? 'Shared Double' : 'Twin (2 Beds)'} · ${mealLabel}`
-        : (resolveField(opt.roomBadge, norm.mode) || opt.shortName || opt.name);
+        : (getOptionRoomBadge(opt, norm.mode) || opt.shortName || opt.name);
 
       return {
         stopId: String(stop.id),
@@ -3462,7 +3634,7 @@
         optionKey,
         optionLabel,
         mealLabel,
-        roomingLabel: solo ? '2+2+1 (Solo)' : '3+2',
+        roomingLabel,
         perSiblingSgd,
       };
     });
@@ -3575,8 +3747,12 @@
         const nextMode = btn.dataset.mode;
         if (state.mode === nextMode) return;
         state.mode = nextMode;
-        if (state.mode === 'M2') state.picks[1] = '1A';
+        const switched = enforceModeCompatibility(state.mode);
         renderAll(true);
+        if (switched.length > 0) {
+          const detail = switched.map((s) => `${s.fromName} → ${s.toName}`).join('; ');
+          showToast(`Mode 2 (3+2): Switched solo-only pick (${detail})`);
+        }
       });
     });
 
