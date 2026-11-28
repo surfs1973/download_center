@@ -20,7 +20,9 @@
       "transit": "Oct 15 · Fly Singapore to Tokyo (overnight transit inside Terminal 2)",
       "routeNote": "Arrive from Singapore, sleep right inside Terminal 2, and walk straight to domestic departures for New Chitose the next morning.",
       "baselineOptionId": "1A",
-      "lockedModes": ["M2"],
+      "lockedModes": [
+        "M2"
+      ],
       "mode2LockNote": "Locked to 1A Shared 3+2 in Mode 2. Switch to Hybrid mode to see the +{{diff:17968-12232}}/sib solo room option.",
       "gridCols": "md:grid-cols-2",
       "guide": {
@@ -47,8 +49,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 12232, "M2": 12232 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 12232,
+            "M2": 12232
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Parents + Sister: 29 m² Triple (2 beds + extra bed) · Brothers: 23 m² Standard Twin (2 proper beds)",
           "tradeOffs": [
@@ -69,9 +77,15 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": false },
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
           "hideInMode2": true,
-          "jpy": { "M1": 17968, "M2": 17968 },
+          "jpy": {
+            "M1": 17968,
+            "M2": 17968
+          },
           "roomBadge": "Sister Solo Room (2+2+1)",
           "roomBreakdown": "Brothers: 23 m² Standard Twin · Sister (Solo): 19 m² Excel Single (wide 140 cm bed) · 42 m² combined",
           "tradeOffs": [
@@ -130,8 +144,14 @@
           "mealTag": "Breakfast Incl.",
           "breakfastMornings": 2,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 36450, "M2": 36450 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 36450,
+            "M2": 36450
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Parents + Sister: 37 m² Deluxe Twin (2 beds + extra bed) · Brothers: 18 m² Hollywood Twin",
           "tradeOffs": [
@@ -152,8 +172,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 31050, "M2": 31050 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 31050,
+            "M2": 31050
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Parents + Sister: 37 m² Deluxe Twin · Brothers: 18 m² Hollywood Twin (same rooms, skip buffet)",
           "tradeOffs": [
@@ -174,8 +200,14 @@
           "mealTag": "Set Breakfast",
           "breakfastMornings": 2,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": false },
-          "jpy": { "M1": 19713, "M2": 20451 },
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 19713,
+            "M2": 20451
+          },
           "roomBadge": {
             "M1": "Sister Solo Room (2+2+1)",
             "M2": "3+2 · Sister w/ Parents"
@@ -215,8 +247,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": false },
-          "jpy": { "M1": 15753, "M2": 16491 },
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 15753,
+            "M2": 16491
+          },
           "roomBadge": {
             "M1": "Sister Solo Room (2+2+1)",
             "M2": "3+2 · Sister w/ Parents"
@@ -289,8 +327,14 @@
           "mealTag": "Half Board · Kaiseki",
           "breakfastMornings": 2,
           "halfBoardDinners": 2,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 77616, "M2": 77616 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 77616,
+            "M2": 77616
+          },
           "roomBadge": "3+2 · Capped at Type AW ÷ 3",
           "roomBreakdown": "Parents + Sister: Type D (83 m² w/ Open-air Bath) · Brothers: Type AW (65 m²) — sibling cost capped at Type AW ÷ 3 ({{sgd:77616}}/sib)",
           "tradeOffs": [
@@ -311,8 +355,14 @@
           "mealTag": "Half Board · Std",
           "breakfastMornings": 2,
           "halfBoardDinners": 2,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 44557, "M2": 44557 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 44557,
+            "M2": 44557
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Parents + Sister: 3p Two-Room Jap-West (~40 m² w/ unit bath) · Brothers: 2p Two-Room Jap-West (2 semi-double beds)",
           "tradeOffs": [
@@ -335,8 +385,14 @@
           "mealTag": "Half Board · Wagyu",
           "breakfastMornings": 2,
           "halfBoardDinners": 2,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 49947, "M2": 49947 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 49947,
+            "M2": 49947
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Same 3+2 Two-Room Jap-West rooms (~40 m² w/ unit bath) upgraded to Hokkaido Wagyu dinner",
           "tradeOffs": [
@@ -386,8 +442,14 @@
           "mealTag": "Half Board · Buffet",
           "breakfastMornings": 2,
           "halfBoardDinners": 2,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 56430, "M2": 56430 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 56430,
+            "M2": 56430
+          },
           "roomBadge": "3+2 · All in Club Wing",
           "roomBreakdown": "Parents + Sister: 56 m² Club Jap-West · Brothers: 56 m² Club Deluxe Twin (same Oct 2022-renovated wing)",
           "tradeOffs": [
@@ -408,8 +470,14 @@
           "mealTag": "Half Board · Buffet",
           "breakfastMornings": 2,
           "halfBoardDinners": 2,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 50857, "M2": 50857 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 50857,
+            "M2": 50857
+          },
           "roomBadge": "3+2 · Bros in Spa Wing",
           "roomBreakdown": "Parents + Sister: stay in 56 m² Club · Brothers: move to connected Spa Resort 7F Standard Twin (36.8 m²)",
           "tradeOffs": [
@@ -455,8 +523,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": false },
-          "jpy": { "M1": 35478, "M2": 34428 },
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 35478,
+            "M2": 34428
+          },
           "roomBadge": {
             "M1": "Sister Solo Room (2+2+1)",
             "M2": "3+2 · Sister w/ Parents"
@@ -513,8 +587,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 31522, "M2": 31522 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 31522,
+            "M2": 31522
+          },
           "roomBadge": "3+2 · Sister w/ Parents",
           "roomBreakdown": "Parents + Sister: 31 m² Scenic Hollywood Triple · Brothers: 26 m² Essential Twin (2 separate beds)",
           "highlight": "Brand-new (opened Dec 2025), 4 min to JR Sapporo & underground walkway, 11F guests-only public bath & full Japanese bathrooms.",
@@ -536,7 +616,10 @@
       "baselineOptionId": "7A",
       "gridCols": "md:grid-cols-2",
       "hasStopConfigurator": true,
-      "defaultVariant": { "beds": "twin", "meal": "ro" },
+      "defaultVariant": {
+        "beds": "twin",
+        "meal": "ro"
+      },
       "guide": {
         "hotels": [
           {
@@ -590,8 +673,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": false, "M2": false },
-          "jpy": { "M1": 54573, "M2": 54573 },
+          "sisterSolo": {
+            "M1": false,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 54573,
+            "M2": 54573
+          },
           "roomBadge": "3+2 · True 3-Bed Triple",
           "roomBreakdown": "Brothers: Standard Twin (23 m², 2 beds) · Parents + Sister: Standard Triple (23 m², 3 single beds)",
           "tradeOffs": [
@@ -607,7 +696,10 @@
           "transitLine": "3 min Ginza Stn · 5 min Higashi-Ginza (direct Haneda) · 7 min JR Shimbashi",
           "variants": {
             "twin_ro": {
-              "jpy": { "M1": 54573, "M2": 54573 },
+              "jpy": {
+                "M1": 54573,
+                "M2": 54573
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Standard Twin (23 m², 2× 110 cm beds) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds)",
@@ -615,7 +707,10 @@
               "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Free cancel up to 2 days prior; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
             },
             "twin_bf": {
-              "jpy": { "M1": 61470, "M2": 61470 },
+              "jpy": {
+                "M1": 61470,
+                "M2": 61470
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Standard Twin (23 m², 2× 110 cm beds) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds) + daily breakfast buffet",
@@ -623,7 +718,10 @@
               "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 3F Bonsalute breakfast buffet. Free cancel up to 2 days prior; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_ro": {
-              "jpy": { "M1": 46313, "M2": 46313 },
+              "jpy": {
+                "M1": 46313,
+                "M2": 46313
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Concept Flooring Double (15 m², 1× 140 cm bed) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds)",
@@ -631,7 +729,10 @@
               "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Free cancel up to 2 days prior; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_bf": {
-              "jpy": { "M1": 53190, "M2": 53190 },
+              "jpy": {
+                "M1": 53190,
+                "M2": 53190
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Concept Flooring Double (15 m², 1× 140 cm bed) · Parents + Sister: Standard Triple (23 m², 3× 110 cm single beds) + daily breakfast buffet",
@@ -647,9 +748,18 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": true },
-          "jpy": { "M1": 54640, "M2": 54640 },
-          "roomBadge": "3+2 Connecting · Sister Adjoining Suite",
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 54640,
+            "M2": 54640
+          },
+          "roomBadge": {
+            "M1": "3+2 Connecting · Sister Adjoining Suite",
+            "M2": "Connecting (3+2)"
+          },
           "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door)",
           "tradeOffs": [
             "Sister gets her own adjoining 12 m² bedroom & bathroom via internal connecting door",
@@ -664,7 +774,10 @@
           "transitLine": "1 min Higashi-Ginza (Asakusa direct Haneda & Hibiya) · 3 min Ginza Stn",
           "variants": {
             "twin_ro": {
-              "jpy": { "M1": 54640, "M2": 54640 },
+              "jpy": {
+                "M1": 54640,
+                "M2": 54640
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 separate beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² rooms joined by internal door, 2× 150 cm beds, 2 baths)",
@@ -672,7 +785,10 @@
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Pay at check-in; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
             },
             "twin_bf": {
-              "jpy": { "M1": 59140, "M2": 59140 },
+              "jpy": {
+                "M1": 59140,
+                "M2": 59140
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Deluxe Twin (17 m², 2 separate beds) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door) + organic buffet breakfast",
@@ -680,7 +796,10 @@
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Organic buffet breakfast + evening welcome drink bar; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_ro": {
-              "jpy": { "M1": 50140, "M2": 50140 },
+              "jpy": {
+                "M1": 50140,
+                "M2": 50140
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Standard Double (12 m², 1× 150 cm wide bed) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door, 2× 150 cm beds, 2 baths)",
@@ -688,14 +807,18 @@
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Pay at check-in; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_bf": {
-              "jpy": { "M1": 54640, "M2": 54640 },
+              "jpy": {
+                "M1": 54640,
+                "M2": 54640
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Standard Double (12 m², 1× 150 cm wide bed) · Parents + Sister: Connecting Standard Double (24 m² = 2× 12 m² w/ internal door) + organic buffet breakfast",
               "mathNote": "Official Super Hotel Free Member (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 12 m² Standard Double ¥100,020 + 1/3 of Parents+Sister 24 m² Connecting Suite (¥191,700 ÷ 3 = ¥63,900) = ¥163,920 sibling pool ÷ 3 = ¥54,640/sib.",
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 2027 closed after 2027/05). Organic buffet breakfast + evening welcome drink bar; free cancel; opt-in daily cleaning via door magnet; excludes Tokyo 3% accommodation tax onsite."
             }
-          }
+          },
+          "connectingRoom": true
         },
         {
           "id": "7C",
@@ -704,15 +827,34 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": true },
-          "jpy": { "M1": 58437, "M2": 58437 },
-          "roomBadge": "Sister Solo Room (2+2+1)",
-          "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 140 cm bed)",
-          "tradeOffs": [
-            "Cheapest true 2+2+1 Twin + Solo setup in central Ginza 3-chome (S$472/sib RO)",
-            "Wide 2× 120 cm Serta twin beds & 100% non-smoking property with free lobby amenity bar",
-            "Sister’s 12 m² solo room is compact; no public bath; proxy Apr 2027 rate (20% Early Bird)"
-          ],
+          "sisterSolo": {
+            "M1": true,
+            "M2": false
+          },
+          "jpy": {
+            "M1": 58437,
+            "M2": 58437
+          },
+          "roomBadge": {
+            "M1": "Sister Solo Room (2+2+1)",
+            "M2": "Connecting (3+2)"
+          },
+          "roomBreakdown": {
+            "M1": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 140 cm bed)",
+            "M2": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Parents + Sister: Connecting Rooms (18.6 m² + 15.3 m² w/ internal door)"
+          },
+          "tradeOffs": {
+            "M1": [
+              "Cheapest true 2+2+1 Twin + Solo setup in central Ginza 3-chome (S$472/sib RO)",
+              "Wide 2× 120 cm Serta twin beds & 100% non-smoking property with free lobby amenity bar",
+              "Sister’s 12 m² solo room is compact; no public bath; proxy Apr 2027 rate (20% Early Bird)"
+            ],
+            "M2": [
+              "Connecting-room option (18.6 m² + 15.3 m² w/ internal door) in central Ginza 3-chome",
+              "Wide 2× 120 cm Serta twin beds & 100% non-smoking property with free lobby amenity bar",
+              "Connecting rooms require direct booking when Oct 2027 opens; no public bath; proxy Apr 2027 rate (20% Early Bird)"
+            ]
+          },
           "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 18.6 m² Superior Twin ¥108,496 + Sister 12 m² Standard Single ¥66,816 = ¥175,312 sibling pool ÷ 3 = ¥58,437/sib.",
           "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite.",
           "link": "https://en.sotetsu-hotels.com/fresa-inn/ginza3/rooms/",
@@ -721,38 +863,63 @@
           "transitLine": "3 min Ginza & Ginza-itchome · 4 min Higashi-Ginza (direct Haneda)",
           "variants": {
             "twin_ro": {
-              "jpy": { "M1": 58437, "M2": 58437 },
+              "jpy": {
+                "M1": 58437,
+                "M2": 58437
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
-              "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+              "roomBreakdown": {
+                "M1": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+                "M2": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Parents + Sister: Connecting Rooms (18.6 m² + 15.3 m² w/ internal door)"
+              },
               "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 18.6 m² Superior Twin ¥108,496 + Sister 12 m² Standard Single ¥66,816 = ¥175,312 sibling pool ÷ 3 = ¥58,437/sib.",
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
             },
             "twin_bf": {
-              "jpy": { "M1": 65037, "M2": 65037 },
+              "jpy": {
+                "M1": 65037,
+                "M2": 65037
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
-              "roomBreakdown": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+              "roomBreakdown": {
+                "M1": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+                "M2": "Brothers: Superior Twin (18.6 m², 2× 120 cm Serta beds) · Parents + Sister: Connecting Rooms (18.6 m² + 15.3 m² w/ internal door) + daily breakfast"
+              },
               "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 18.6 m² Superior Twin ¥121,696 + Sister 12 m² Standard Single ¥73,416 = ¥195,112 sibling pool ÷ 3 = ¥65,037/sib.",
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_ro": {
-              "jpy": { "M1": 54357, "M2": 54357 },
+              "jpy": {
+                "M1": 54357,
+                "M2": 54357
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
-              "roomBreakdown": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+              "roomBreakdown": {
+                "M1": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed)",
+                "M2": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Parents + Sister: Connecting Rooms (18.6 m² + 15.3 m² w/ internal door)"
+              },
               "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, RO, tax incl.): Brothers 15.3 m² Comfort Double ¥96,256 + Sister 12 m² Standard Single ¥66,816 = ¥163,072 sibling pool ÷ 3 = ¥54,357/sib.",
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_bf": {
-              "jpy": { "M1": 60957, "M2": 60957 },
+              "jpy": {
+                "M1": 60957,
+                "M2": 60957
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
-              "roomBreakdown": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+              "roomBreakdown": {
+                "M1": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Sister (Solo): Standard Single (12 m², 1× 140 cm Serta bed) + daily breakfast",
+                "M2": "Brothers: Comfort Double (15.3 m², 1× 140 cm Serta bed) · Parents + Sister: Connecting Rooms (18.6 m² + 15.3 m² w/ internal door) + daily breakfast"
+              },
               "mathNote": "Official Sotetsu Hotels 20% Off Early Bird Member Sale (Apr 22–25, 2027 proxy, BF, tax incl.): Brothers 15.3 m² Comfort Double ¥109,456 + Sister 12 m² Standard Single ¥73,416 = ¥182,872 sibling pool ÷ 3 = ¥60,957/sib.",
               "proxyFootnote": "Apr 22–25, 2027 proxy (Oct 28 not open yet). Free cancel until 2 days prior; opt-in daily cleaning via blue door tag; excludes Tokyo 3% accommodation tax onsite."
             }
-          }
+          },
+          "connectingRoom": true
         },
         {
           "id": "7D",
@@ -761,8 +928,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": true },
-          "jpy": { "M1": 64511, "M2": 64511 },
+          "sisterSolo": {
+            "M1": true,
+            "M2": true
+          },
+          "jpy": {
+            "M1": 64511,
+            "M2": 64511
+          },
           "roomBadge": "Sister Solo Room (2+2+1)",
           "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
           "warningBadge": "1 Twin room left (Oct 2027)",
@@ -779,7 +952,10 @@
           "transitLine": "1 min Kyobashi (Ginza) · 2 min Takaracho (direct Haneda) · 7 min JR Tokyo",
           "variants": {
             "twin_ro": {
-              "jpy": { "M1": 64511, "M2": 64511 },
+              "jpy": {
+                "M1": 64511,
+                "M2": 64511
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
@@ -788,7 +964,10 @@
               "warningBadge": "1 Twin room left (Oct 2027)"
             },
             "twin_bf": {
-              "jpy": { "M1": 70572, "M2": 70572 },
+              "jpy": {
+                "M1": 70572,
+                "M2": 70572
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Economy Twin (18.4 m², 2 beds, bathtub) · Sister (Solo): Inside Semi-Double (15 m², shower booth) + daily breakfast",
@@ -797,7 +976,10 @@
               "warningBadge": "1 Twin room left (Oct 2027)"
             },
             "double_ro": {
-              "jpy": { "M1": 62276, "M2": 62276 },
+              "jpy": {
+                "M1": 62276,
+                "M2": 62276
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Inside Semi-Double (15 m², ~140 cm bed, shower booth) · Sister (Solo): Inside Semi-Double (15 m², shower booth)",
@@ -805,14 +987,18 @@
               "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate. Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_bf": {
-              "jpy": { "M1": 68336, "M2": 68336 },
+              "jpy": {
+                "M1": 68336,
+                "M2": 68336
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Inside Semi-Double (15 m², ~140 cm bed, shower booth) · Sister (Solo): Inside Semi-Double (15 m², shower booth) + daily breakfast",
               "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Live Oct 28–31, 2027, 3+ Nights Consecutive BF, tax incl.): Brothers 15 m² Inside Semi-Double ¥105,524 + Sister 15 m² Inside Semi-Double ¥99,484 = ¥205,008 sibling pool ÷ 3 = ¥68,336/sib.",
               "proxyFootnote": "Live Oct 28–31, 2027 Official Free Member rate w/ 7F Arch Cafe breakfast. Pay at hotel; free cancel; excludes Tokyo 3% accommodation tax onsite."
             }
-          }
+          },
+          "hideInMode2": true
         },
         {
           "id": "7E",
@@ -821,8 +1007,14 @@
           "mealTag": "Room Only",
           "breakfastMornings": 0,
           "halfBoardDinners": 0,
-          "sisterSolo": { "M1": true, "M2": true },
-          "jpy": { "M1": 106722, "M2": 106722 },
+          "sisterSolo": {
+            "M1": true,
+            "M2": true
+          },
+          "jpy": {
+            "M1": 106722,
+            "M2": 106722
+          },
           "roomBadge": "Sister Solo Room (2+2+1)",
           "roomBreakdown": "Brothers: Twin (23 m², JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², JAPANiCAN)",
           "warningBadge": "OTA Twin only — switch to Shared Double for S$341",
@@ -839,7 +1031,10 @@
           "transitLine": "2 min Hibiya (Hibiya/Chiyoda/Mita) · 4 min JR Yurakucho (Yamanote) · 5 min Ginza",
           "variants": {
             "twin_ro": {
-              "jpy": { "M1": 106722, "M2": 106722 },
+              "jpy": {
+                "M1": 106722,
+                "M2": 106722
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Twin (23 m², 2 beds, bathtub — JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², shower booth — JAPANiCAN)",
@@ -848,7 +1043,10 @@
               "warningBadge": "OTA Twin only — switch to Shared Double for S$341"
             },
             "twin_bf": {
-              "jpy": { "M1": 114063, "M2": 114063 },
+              "jpy": {
+                "M1": 114063,
+                "M2": 114063
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Twin (23 m², 2 beds, bathtub — JAPANiCAN Live Oct 2027) · Sister (Solo): Semi-Double (15 m², shower booth — JAPANiCAN) + daily breakfast",
@@ -857,7 +1055,10 @@
               "warningBadge": "OTA Twin only — switch to Shared Double for S$390"
             },
             "double_ro": {
-              "jpy": { "M1": 42250, "M2": 42250 },
+              "jpy": {
+                "M1": 42250,
+                "M2": 42250
+              },
               "breakfastMornings": 0,
               "mealTag": "Room Only",
               "roomBreakdown": "Brothers: Economy Double (15.1 m², ~140 cm bed, bathtub, Apr 2027 Official Member proxy) · Sister (Solo): Economy Double (15.1 m², shower booth)",
@@ -865,14 +1066,18 @@
               "proxyFootnote": "Apr 22–25, 2027 Official Free Member proxy (Oct 2027 not open on Official yet). Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
             },
             "double_bf": {
-              "jpy": { "M1": 48310, "M2": 48310 },
+              "jpy": {
+                "M1": 48310,
+                "M2": 48310
+              },
               "breakfastMornings": 3,
               "mealTag": "With Breakfast (3 mornings)",
               "roomBreakdown": "Brothers: Economy Double (15.1 m², ~140 cm bed, bathtub, Apr 2027 Official Member proxy) · Sister (Solo): Economy Double (15.1 m², shower booth) + daily breakfast",
               "mathNote": "Official Hankyu-Hanshin HH cross ID Free Member (~15% off, Apr 22–25, 2027 proxy, 3+ Nights Consecutive BF, tax incl.): Brothers 15.1 m² Economy Double ¥75,486 + Sister 15.1 m² Economy Double ¥69,445 = ¥144,931 sibling pool ÷ 3 = ¥48,310/sib.",
               "proxyFootnote": "Apr 22–25, 2027 Official Free Member proxy w/ 2F Café & Meal MUJI breakfast. Pay at hotel; free cancel; standard daily cleaning; excludes Tokyo 3% accommodation tax onsite."
             }
-          }
+          },
+          "hideInMode2": true
         }
       ]
     }
@@ -883,7 +1088,13 @@
       "name": "The Comfort Baseline",
       "tag": "Reference Pick",
       "desc": "La Vista Furano, 5★ Takinoya, Nonokaze Club & Hotel Gracery Ginza (live Oct 2027, Twin RO).",
-      "picks": { "1": "1A", "2": "2A_BF", "3": "3A", "4": "4A", "7": "7A" },
+      "picks": {
+        "1": "1A",
+        "2": "2A_BF",
+        "3": "3A",
+        "4": "4A",
+        "7": "7A"
+      },
       "stop7Beds": "twin",
       "stop7Meal": "ro"
     },
@@ -892,7 +1103,13 @@
       "name": "Smart Value",
       "tag": "Recommended",
       "desc": "Save big on sightseeing-heavy Furano to keep the 5★ onsen resorts & pick Super Hotel Premier Ginza (Twin + organic breakfast & Sister’s connected room).",
-      "picks": { "1": "1A", "2": "2B_RO", "3": "3A", "4": "4A", "7": "7B" },
+      "picks": {
+        "1": "1A",
+        "2": "2B_RO",
+        "3": "3A",
+        "4": "4A",
+        "7": "7B"
+      },
       "stop7Beds": "twin",
       "stop7Meal": "bf"
     },
@@ -901,7 +1118,13 @@
       "name": "Budget-Friendly",
       "tag": "Lowest Likely",
       "desc": "Natulux RO + Tamanoyu Std + Nonokaze Spa + remm Hibiya (Shared Double RO) for maximum savings.",
-      "picks": { "1": "1A", "2": "2B_RO", "3": "3B_STD", "4": "4B", "7": "7E" },
+      "picks": {
+        "1": "1A",
+        "2": "2B_RO",
+        "3": "3B_STD",
+        "4": "4B",
+        "7": "7E"
+      },
       "stop7Beds": "double",
       "stop7Meal": "ro"
     }
