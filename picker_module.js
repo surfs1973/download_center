@@ -3652,6 +3652,137 @@
   }
 
   /**
+   * Pure, side-effect-free compact JSON exporter for the Compact JSON Export modal.
+   * Includes the selected option and ALL non-selected options/variants per stop
+   * (tagging M1-only pure-solo options with `modeTag: "M1 only"` when evaluating M2),
+   * without mutating live planner state or touching the DOM.
+   */
+  function exportOptionsJson(inputState, fxOverride) {
+    if (!state.dataLoaded || STOPS.length === 0) return null;
+
+    const sourceState = (inputState && typeof inputState === 'object') ? inputState : getState();
+    const fallbackFx = Number.isFinite(Number(state.fxRate))
+      ? Number(state.fxRate)
+      : Number(CONFIG.defaultFxRate);
+
+    const norm = normalizeStateSnapshot(sourceState, {
+      fxOverride,
+      fallbackMode: state.mode || 'M1',
+      fallbackFx,
+    });
+
+    const totals = computeTotalsForPicks(
+      norm.picks,
+      norm.mode,
+      norm.fx,
+      norm.stop7Beds,
+      norm.stop7Meal
+    );
+
+    const buildEntry = (stop, rawOpt, beds, meal, effectiveMode, isM1Only) => {
+      const hasVariant = Boolean(rawOpt && rawOpt.variants && beds && meal);
+      const opt = hasVariant ? resolveOptionData(stop, rawOpt, beds, meal) : resolveOptionData(stop, rawOpt);
+      const roomingLabel = getOptionRoomingLabel(opt, effectiveMode);
+      const roomingKey = effectiveMode === 'M2' && isOptionConnecting(opt)
+        ? 'connecting-3+2'
+        : (isOptionSolo(opt, effectiveMode) ? 'solo' : '3+2');
+      const mealTag = opt.mealTag || 'Room Only';
+      const sgd = Math.round(getOptionJpy(opt, effectiveMode) / norm.fx);
+
+      let id = String(opt.id || '');
+      let optionKey;
+      let label;
+
+      if (hasVariant) {
+        const bedCode = beds === 'double' ? 'DB' : beds === 'twin' ? 'TW' : String(beds).toUpperCase();
+        const mealCode = meal === 'bf' ? 'BF' : meal === 'ro' ? 'RO' : String(meal).toUpperCase();
+        id = `${opt.id}_${bedCode}_${mealCode}`;
+        optionKey = `${stop.id}|${opt.id}|${beds}|${meal}|${roomingKey}`;
+        const bedWord = beds === 'double' ? 'Double' : beds === 'twin' ? 'Twin' : beds;
+        const mealWord = meal === 'bf' ? 'Breakfast' : meal === 'ro' ? 'Room Only' : mealTag;
+        label = `${opt.name} · ${bedWord} · ${mealWord} · ${roomingLabel}`;
+      } else {
+        optionKey = `${stop.id}|${opt.id}|${roomingKey}|${mealTag}`;
+        const nameLower = String(opt.name || '').toLowerCase();
+        const includeMeal = mealTag && !nameLower.includes(mealTag.toLowerCase());
+        label = includeMeal
+          ? `${opt.name} · ${mealTag} · ${roomingLabel}`
+          : `${opt.name} · ${roomingLabel}`;
+      }
+
+      const entry = { id, optionKey, label, sgd };
+      if (isM1Only) entry.modeTag = 'M1 only';
+      return entry;
+    };
+
+    const exportedStops = STOPS.map((stop) => {
+      const selectedOpt = getSelectedOptionForStop(stop, norm.mode, norm.picks, norm.stop7Beds, norm.stop7Meal);
+      const compactCity = stop.id === 7
+        ? String(stop.city || 'Tokyo').replace(/\s*\([^)]*\)/g, '').trim()
+        : String(stop.city || '');
+      const compactDates = String(stop.dates || '').replace(/[–—]/g, '-');
+      const stopLabel = `${stop.id}. ${compactCity} (${compactDates}, ${Number(stop.nights)}nt)`;
+
+      let selected = null;
+      const notSelected = [];
+
+      (stop.options || []).forEach((rawOpt) => {
+        const isM1Only = norm.mode === 'M2' && !isOptionAllowedInMode(rawOpt, 'M2');
+        const effectiveMode = isM1Only ? 'M1' : norm.mode;
+
+        if (stop.hasStopConfigurator && rawOpt.variants && typeof rawOpt.variants === 'object') {
+          Object.keys(rawOpt.variants).forEach((vKey) => {
+            const parts = vKey.split('_');
+            const vBeds = parts[0];
+            const vMeal = parts[1];
+            const isPicked = !isM1Only
+              && rawOpt.id === selectedOpt.id
+              && vBeds === norm.stop7Beds
+              && vMeal === norm.stop7Meal;
+            const entry = buildEntry(stop, rawOpt, vBeds, vMeal, effectiveMode, isM1Only);
+            if (isPicked) selected = entry;
+            else notSelected.push(entry);
+          });
+        } else {
+          const isPicked = !isM1Only && rawOpt.id === selectedOpt.id;
+          const entry = buildEntry(stop, rawOpt, null, null, effectiveMode, isM1Only);
+          if (isPicked) selected = entry;
+          else notSelected.push(entry);
+        }
+      });
+
+      if (!selected) {
+        selected = buildEntry(
+          stop,
+          selectedOpt,
+          stop.hasStopConfigurator ? norm.stop7Beds : null,
+          stop.hasStopConfigurator ? norm.stop7Meal : null,
+          norm.mode,
+          false
+        );
+      }
+
+      return {
+        stop: stopLabel,
+        selected,
+        notSelected,
+      };
+    });
+
+    return {
+      mode: norm.mode,
+      fx: norm.fx,
+      totalsSgd: {
+        hotels: totals.hotelSgd,
+        mealsNet: totals.mealsNetSgd,
+        fullTrip: totals.fullTripSgd,
+        soloNights: totals.soloNights,
+      },
+      stops: exportedStops,
+    };
+  }
+
+  /**
    * Internal validator/applier used both by applyState() and loadTripData() (if buffered pre-load).
    * Safely ignores unknown/retired option IDs (falling back to that stop's default).
    */
@@ -3876,5 +4007,5 @@
     return Boolean(state.dataLoaded && STOPS.length > 0);
   }
 
-  global.HokkaidoPickerModule = { init, isReady, getState, applyState, evaluateState };
+  global.HokkaidoPickerModule = { init, isReady, getState, applyState, evaluateState, exportOptionsJson };
 })(window);
